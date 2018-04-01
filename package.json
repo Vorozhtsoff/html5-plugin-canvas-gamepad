@@ -46,7 +46,7 @@
   ],
   "author": "eugene andruszczenko <eugene.andruszczenko@gmail.com> (http://32teeth.org)",
   "license": "Apache 2.0",
-  "dependencies": {
+  "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
