@@ -1,838 +1,243 @@
-import font from './font';
+/* eslint-disable no-use-before-define */
+import importedFont from './font';
 
-let bit = font;
-
-const CanvasGamepad = (function () {
-    let canvas = null;
-    let ctx;
-    const px = 0;
-    const py = 0;
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    /*
-	** @param scale {array}
-	*/
-    const scale = [
-        (window.innerWidth / width),
-        (window.innerHeight / height)
-    ];
-
-    /*
-	** @param bit {object}
-	** @description 8 bit font used in application
-	*/
-    const font = {};
-
-    let touches = {};
-    const map = {};
-
-    /*
-  ** @param toggle {boolean}
-  */
-    let toggle = false;
-
-    /*
-  ** @param ready {boolean}
-  */
-    let ready = false;
-
-    /*
-  ** @param hint {boolean}
-  */
-    const hint = false;
-
-    /*
-	* @param debug {boolean}
-	*/
-    const debug = false;
-    /*
-	** @param debug {boolean}
-	*/
-    const trace = false;
-
-    /*
-	** @param hidden {boolean}
-	*/
-    const hidden = false;
-
-    /*
-	** @param position {string}
-	** @description
-	** TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT | BOTTOM_RIGHT
-	*/
-    let layout = 'BOTTOM_RIGHT';
+let bit = importedFont;
 
 
-    /*
-	** @param radius {int}
-	*/
-    const radius = 25;
+let canvas = null;
+let ctx;
 
-    /*
-	** @param opacity {float} (0.0 -> 1.0)
-	** @description opacity
-	*/
-    const opacity = 0.4;
+const width = window.innerWidth;
+const height = window.innerHeight;
 
-    /*
-	** @param colors {object}
-	** @description color collection used in app in rgba format
-	*/
-    const colors = {
-        red: `rgba(255,0,0,${opacity})`,
-        green: `rgba(0,255,0,${opacity})`,
-        blue: `rgba(0,0,255,${opacity})`,
-        purple: `rgba(255,0,255,${opacity})`,
-        yellow: `rgba(255,255,0,${opacity})`,
-        cyan: `rgba(0,255,255,${opacity})`,
-        black: `rgba(0,0,0,${opacity})`,
-        white: `rgba(255,255,255,${opacity})`,
-        joystick: {
-            base: `rgba(0,0,0,${opacity})`,
-            dust: `rgba(0,0,0,${opacity})`,
-            stick: 'rgba(204,204,204,1)',
-            ball: 'rgba(255,255,255,1)'
-        }
-    };
+/*
+** @param scale {array}
+*/
+const scale = [
+    (window.innerWidth / width),
+    (window.innerHeight / height)
+];
 
-    /*
-	** @param buttons {int}
-	*/
-    let buttons = 0;
+let touches = {};
+const map = {};
 
-    /*
-	** @param buttons_layout {array}
-	*/
-    let buttons_layout = [
-        [
-            {
-                x: 0, y: 0, r: radius, color: colors.red, name: 'a'
-            }
-        ],
-        [
-            {
-                x: -(radius / 4), y: radius + (radius / 2), r: radius, color: colors.red, name: 'a'
-            },
-            {
-                x: (radius + (radius / 0.75)), y: -radius + (radius / 2), r: radius, color: colors.green, name: 'b'
-            }
-        ],
-        [
-            {
-                x: -radius * 0.75, y: radius * 2, r: radius, color: colors.red, name: 'a'
-            },
-            {
-                x: radius * 1.75, y: radius, r: radius, color: colors.green, name: 'b'
-            },
-            {
-                x: radius * 3.5, y: -radius, r: radius, color: colors.blue, name: 'c'
-            }
-        ],
-        [
-            {
-                x: -radius, y: radius, r: radius, color: colors.red, name: 'a'
-            },
-            {
-                x: radius * 2 - radius, y: -(radius + (radius)) + radius, r: radius, color: colors.green, name: 'b'
-            },
-            {
-                x: radius * 2 - radius, y: (radius + radius) + radius, r: radius, color: colors.blue, name: 'x'
-            },
-            {
-                x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
-            }
-        ]
-    ];
-    /*
-	** @param button_offset {object}
-	*/
-    const button_offset = { x: (radius * 3), y: (radius * 3) };
-    /*
-	** @param buttons_layout_built {boolean}
-	*/
-    let buttons_layout_built = false;
+/*
+** @param toggle {boolean}
+*/
+let toggle = false;
 
-    /*
-	** @param start {boolean}
-	*/
-    const start = true;
-    const start_button = {
-        x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'start'
-    };
+/*
+** @param ready {boolean}
+*/
+let ready = false;
 
-    /*
-	** @param start {boolean}
-	*/
-    const select = false;
-    const select_button = {
-        x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'select'
-    };
+/*
+** @param hint {boolean}
+*/
+const hint = false;
 
-    /*
-	** @param hidden {boolean}
-	*/
-    const joystick = true;
+/*
+* @param debug {boolean}
+*/
+const debug = false;
+/*
+** @param debug {boolean}
+*/
+const trace = false;
 
- 	/*
-	** @method setup
-	** @description
-	*/
-    function setup(config) {
-        document.addEventListener('touchmove', (e) => { e.preventDefault(); }, false);
-        css();
-        let length = 0;
-        for (var prop in config) { if (config.hasOwnProperty(prop)) { length++; } }
-        if (length > 0) {
-            config.canvas ? stage.assign(config.canvas) : stage.create();
-            for (var prop in config) {
-                switch (prop) {
-                    case 'debug':
-                    case 'trace':
-                    case 'layout':
-                    case 'start':
-                    case 'select':
-                    case 'hidden':
-                    case 'joystick':
-                    case 'hint':
-                        switch (typeof config[prop]) {
-                            case 'string':
-                                eval(`${prop}='${config[prop]}'`);
-                                break;
-                            case 'boolean':
-                            case 'number':
-                                eval(`${prop}=${config[prop]}`);
-                                break;
-                            case 'object':
-                                switch (prop) {
-                                    case 'start':
-                                    case 'select':
-                                        eval(`${prop}=${true}`);
-                                        eval(`${prop}_button.key="${config[prop].key}"`);
-                                        break;
-                                }
-                                break;
-                        }
-                        break;
-                    case 'buttons':
-                        buttons = config[prop].length - 1;
-                        if (config[prop].length > buttons_layout.length) { buttons = buttons_layout.length - 1; }
-                        buttons_layout = buttons_layout[buttons];
-                        for (let n = 0; n < buttons + 1; n++) {
-                            const button = config[prop][n];
-                            if (button.name) { buttons_layout[n].name = button.name; }
-                            if (button.color) { buttons_layout[n].color = button.color; }
-                            if (button.key) { buttons_layout[n].key = button.key; }
-                            buttons_layout_built = true;
-                        }
-                        break;
-                }
-            }
-        }
-        /*
-		** @description default setting
-		*/
-        else {
-            stage.create();
-        }
-        if (!buttons_layout_built) { buttons_layout = buttons_layout[buttons]; }
+/*
+** @param hidden {boolean}
+*/
+const hidden = false;
 
-        if (start) { buttons_layout.push(start_button); }
-        if (select) { buttons_layout.push(select_button); }
+/*
+** @param position {string}
+** @description
+** TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT | BOTTOM_RIGHT
+*/
+let layout = 'BOTTOM_RIGHT';
 
-        events.bind();
-        controller.init();
-        init();
+
+/*
+    ** @param radius {int}
+    */
+const radius = 25;
+
+/*
+** @param opacity {float} (0.0 -> 1.0)
+** @description opacity
+*/
+const opacity = 0.4;
+
+/*
+** @param colors {object}
+** @description color collection used in app in rgba format
+*/
+const colors = {
+    red: `rgba(255,0,0,${opacity})`,
+    green: `rgba(0,255,0,${opacity})`,
+    blue: `rgba(0,0,255,${opacity})`,
+    purple: `rgba(255,0,255,${opacity})`,
+    yellow: `rgba(255,255,0,${opacity})`,
+    cyan: `rgba(0,255,255,${opacity})`,
+    black: `rgba(0,0,0,${opacity})`,
+    white: `rgba(255,255,255,${opacity})`,
+    joystick: {
+        base: `rgba(0,0,0,${opacity})`,
+        dust: `rgba(0,0,0,${opacity})`,
+        stick: 'rgba(204,204,204,1)',
+        ball: 'rgba(255,255,255,1)'
     }
+};
 
- 	/*
-	** @method setup
-	** @description
-	*/
-    function init() {
-        /*
-		** show loading
-		*/
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = bit.small;
-        ctx.fillText('loading', width / 2, height / 2);
-        if (joystick) { controller.stick.draw(); }
-        controller.buttons.draw();
-        setTimeout(() => { ready = true; }, 250);
+/*
+** @param buttons {int}
+*/
+let buttons = 0;
+
+/*
+** @param buttonsLayout {array}
+*/
+let buttonsLayout = [
+    [{
+        x: 0,
+        y: 0,
+        r: radius,
+        color: colors.red,
+        name: 'a'
+    }],
+    [
+        {
+            x: -(radius / 4),
+            y: radius + (radius / 2),
+            r: radius,
+            color: colors.red,
+            name: 'a'
+        },
+        {
+            x: (radius + (radius / 0.75)),
+            y: -radius + (radius / 2),
+            r: radius,
+            color: colors.green,
+            name: 'b'
+        }
+    ],
+    [
+        {
+            x: -radius * 0.75,
+            y: radius * 2,
+            r: radius,
+            color: colors.red,
+            name: 'a'
+        },
+        {
+            x: radius * 1.75,
+            y: radius,
+            r: radius,
+            color: colors.green,
+            name: 'b'
+        },
+        {
+            x: radius * 3.5,
+            y: -radius,
+            r: radius,
+            color: colors.blue,
+            name: 'c'
+        }
+    ],
+    [
+        {
+            x: -radius,
+            y: radius,
+            r: radius,
+            color: colors.red,
+            name: 'a'
+        },
+        {
+            x: (radius * 2) - radius,
+            y: -(radius + (radius)) + radius,
+            r: radius,
+            color: colors.green,
+            name: 'b'
+        },
+        {
+            x: (radius * 2) - radius,
+            y: (radius + radius) + radius,
+            r: radius,
+            color: colors.blue,
+            name: 'x'
+        },
+        {
+            x: radius * 3,
+            y: 0 + radius,
+            r: radius,
+            color: colors.purple,
+            name: 'y'
+        }
+    ]
+];
+/*
+** @param buttonLayout {object}
+*/
+const buttonLayout = { x: (radius * 3), y: (radius * 3) };
+/*
+** @param buttonsLayoutBuilt {boolean}
+*/
+let buttonsLayoutBuilt = false;
+
+/*
+** @param start {boolean}
+*/
+const start = true;
+const startButton = {
+    x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'start'
+};
+
+/*
+** @param start {boolean}
+*/
+const select = false;
+const selectButton = {
+    x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'select'
+};
+
+/*
+** @param hidden {boolean}
+*/
+const joystick = true;
+
+const stage = {
+    create(id = 'CanvasGamepad') {
+        canvas = document.createElement('canvas');
+        canvas.setAttribute('id', id);
+        document.body.appendChild(canvas);
+        stage.assign(id);
+    },
+    assign(id) {
+        if (!document.getElementById(id)) {
+            stage.create(id);
+        }
+        canvas = document.getElementById(id);
+        stage.adjust();
+    },
+    adjust() {
+        ctx = canvas.getContext('2d');
+        ctx.canvas.width = width * scale[0];
+        ctx.canvas.height = height * scale[1];
+        ctx.scale(scale[0], scale[1]);
     }
+};
 
- 	/*
-	** @method setup
-	** @description
-	*/
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (!hidden) {
-            if (debug) { helper.debug(); }
-            if (trace) { helper.trace(); }
-            if (joystick) { controller.stick.draw(); }
-            controller.buttons.draw();
-        }
-    }
-
-    /*
-	** @property stage {object}
-	** @description used to create and assign canvas object
-	*/
-    var stage = {
-        create(id) {
-            var id = id || 'CanvasGamepad';
-            canvas = document.createElement('canvas');
-            canvas.setAttribute('id', id);
-            document.body.appendChild(canvas);
-            stage.assign(id);
-        },
-        assign(id) {
-            if (!document.getElementById(id)) { stage.create(id); }
-            canvas = document.getElementById(id);
-            stage.adjust();
-        },
-        adjust() {
-            ctx = canvas.getContext('2d');
-            ctx.canvas.width = width * scale[0];
-            ctx.canvas.height = height * scale[1];
-            ctx.scale(scale[0], scale[1]);
-        }
-    };
-
-    /*
-	** @property controller {object}
-	** @description used to draw the controller
-	*/
-    var controller = {
-        init() {
-            const layout_string = layout;
-            layout = { x: 0, y: 0 };
-            switch (layout_string) {
-                case 'TOP_LEFT':
-                    var shift = 0;
-                    for (var n = 0; n < buttons_layout.length; n++) {
-                        if (buttons_layout[n].r) {
-                            shift += buttons_layout[n].r;
-                            buttons_layout[n].y -= buttons_layout[n].r * 2;
-                        }
-                    }
-                    layout.x = shift + button_offset.x;
-                    layout.y = 0 + button_offset.y;
-                    break;
-                case 'TOP_RIGHT':
-                    layout.x = width - button_offset.x;
-                    layout.y = 0 + button_offset.y;
-                    break;
-                case 'BOTTOM_LEFT':
-                    var shift = 0;
-                    for (var n = 0; n < buttons_layout.length; n++) {
-                        if (buttons_layout[n].r) {
-                            shift += buttons_layout[n].r;
-                        }
-                    }
-                    layout.x = shift + button_offset.x;
-                    layout.y = height - button_offset.y;
-                    break;
-                case 'BOTTOM_RIGHT':
-                    layout.x = width - button_offset.x;
-                    layout.y = height - button_offset.y;
-                    break;
-            }
-
-            controller.buttons.init();
-            if (joystick) { controller.stick.init(); }
-        },
-        buttons: {
-            init() {
-                for (let n = 0; n < buttons_layout.length; n++) {
-                    const button = buttons_layout[n];
-                    var x = layout.x - button.x;
-                    var y = layout.y - button.y;
-                    if (button.r) {
-                        const r = button.r;
-                        buttons_layout[n].hit = { x: [x - r, x + (r * 2)], y: [y - r, y + (r * 2)], active: false };
-                    } else {
-                        button.x = width / 2 - (button.w);
-                        if (start && select) {
-                            switch (button.name) {
-                                case 'select':
-                                    button.x = width / 2 - (button.w) - (button.h * 2);
-                                    break;
-                                case 'start':
-                                    button.x = width / 2;
-                                    break;
-                            }
-                        }
-                        var x = button.x;
-                        var y = layout.y - button.y;
-                        buttons_layout[n].hit = { x: [x, x + button.w], y: [y, y + button.h], active: false };
-                    }
-                    map[button.name] = 0;
-                }
-            },
-            draw() {
-                for (let n = 0; n < buttons_layout.length; n++) {
-                    const button = buttons_layout[n];
-                    const name = button.name;
-                    const color = button.color;
-
-                    var x = layout.x - button.x;
-                    var y = layout.y - button.y;
-                    button.dx = x;
-                    button.dy = y;
-
-                    if (button.r) {
-                        var r = button.r;
-
-                        if (button.hit) {
-                            if (button.hit.active) {
-                                ctx.fillStyle = color;
-                                ctx.beginPath();
-                                ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
-                                ctx.fill();
-                                ctx.closePath();
-                            }
-                        }
-
-                        ctx.fillStyle = color;
-                        ctx.beginPath();
-                        ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-                        ctx.fill();
-                        ctx.closePath();
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-
-                        ctx.fillStyle = 'rgba(255,255,255,1)';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.font = bit.button;
-                        ctx.fillText(button.name, x, y);
-                    } else {
-                        var w = button.w;
-                        const h = button.h;
-                        var x = button.x;
-                        var y = button.dy;
-                        var r = 10;
-                        ctx.fillStyle = color;
-                        if (button.hit) {
-                            if (button.hit.active) {
-                                ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
-                            }
-                        }
-                        ctx.roundRect(x, y, w, h, r).fill();
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.font = bit.button;
-                        ctx.fillText(button.name, x + w / 2, y + (h * 2));
-                    }
-
-                    if (button.key && hint) {
-                        ctx.fillStyle = 'rgba(0,0,0,0.25)';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.font = bit.button;
-                        if (button.name == 'start' || button.name == 'select') {
-                            x += w / 2;
-                        }
-                        ctx.fillText(button.key, x, y - (r * 1.5));
-                    }
-                }
-            },
-            state(id, n, type) {
-                if (touches[id].id != 'stick') {
-                    const touch = {
-                        x: touches[id].x,
-                        y: touches[id].y
-                    };
-                    const button = 	buttons_layout[n];
-                    const name = button.name;
-
-                    const dx = parseInt(touch.x - button.dx);
- 					const dy = parseInt(touch.y - button.dy);
- 					let dist = width;
- 					if (button.r) {
- 						dist = parseInt(Math.sqrt(dx * dx + dy * dy));
- 					} else if (touch.x > button.hit.x[0] && touch.x < button.hit.x[1] && touch.y > button.hit.y[0] && touch.y < button.hit.y[1]) {
-                        dist = 0;
-                    }
- 					if (dist < radius && touches[id].id != 'stick') {
-                        if (!type) {
-                            touches[id].id = name;
-                        } else {
-                            switch (type) {
-                                case 'mousedown':
-                                    touches[id].id = name;
-                                    break;
-                                case 'mouseup':
-                                    delete touches[id].id;
-                                    controller.buttons.reset(n);
-                                    break;
-                            }
-                        }
- 					}
-                    if (touches[id].id == name) {
- 						map[name] = 1;
- 						button.hit.active = true;
- 						if (dist > radius) {
- 							button.hit.active = false;
- 							map[name] = 0;
- 							delete touches[id].id;
- 						}
- 					}
-                }
-            },
-            reset(n) {
-                const button = 	buttons_layout[n];
-                const name = button.name;
-                button.hit.active = false;
-                map[name] = 0;
-            }
-        },
-        stick: {
-            radius: 40,
-            x: 0,
-            y: 0,
-            dx: 0,
-            dy: 0,
-            init() {
-                this.radius = 40;
-                this.x = (width) - (layout.x);
-                this.y = layout.y;
-                this.dx = this.x;
-                this.dy = this.y;
-                map['x-dir'] = 0;
-                map['y-dir'] = 0;
-                map['x-axis'] = 0;
-                map['y-axis'] = 0;
-            },
-            draw() {
-                ctx.fillStyle = colors.joystick.base;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-                ctx.fill();
-                ctx.closePath();
-
-                ctx.fillStyle = colors.joystick.dust;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI, false);
-                ctx.fill();
-                ctx.closePath();
-
-                ctx.fillStyle = colors.joystick.stick;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
-                ctx.fill();
-                ctx.closePath();
-
-                ctx.fillStyle = colors.joystick.ball;
-                ctx.beginPath();
-                ctx.arc(this.dx, this.dy, this.radius - 10, 0, 2 * Math.PI, false);
-                ctx.fill();
-                ctx.closePath();
-            },
-            state(id, type) {
-                const touch = {
-                    x: touches[id].x,
-                    y: touches[id].y
-                };
-                const dx = parseInt(touch.x - this.x);
-                const dy = parseInt(touch.y - this.y);
-                const dist = (parseInt(Math.sqrt(dx * dx + dy * dy)));
-                if (dist < (this.radius * 1.5)) {
-                    if (!type) {
-                        touches[id].id = 'stick';
-                    } else {
-                        switch (type) {
-                            case 'mousedown':
-                                touches[id].id = 'stick';
-                                break;
-                            case 'mouseup':
-                                delete touches[id].id;
-                                controller.stick.reset();
-                                break;
-                        }
-                    }
-                }
-                if (touches[id].id == 'stick') {
-                    if (Math.abs(parseInt(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
-                    if (Math.abs(parseInt(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
-                    map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
-                    map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
-                    map['x-dir'] = Math.round(map['x-axis']);
-                    map['y-dir'] = Math.round(map['y-axis']);
-
-                    if (dist > (this.radius * 1.5)) {
-                        controller.stick.reset();
-                        delete touches[id].id;
-                    }
-                }
-            },
-            reset() {
-                this.dx = this.x;
-                this.dy = this.y;
-                map['x-dir'] = 0;
-                map['y-dir'] = 0;
-                map['x-axis'] = 0;
-                map['y-axis'] = 0;
-            }
-        }
-    };
-
-
-    /*
-	**
-	*/
-    var events = {
-        bind() {
-            let ev = {
-                browser: ['mousedown', 'mouseup', 'mousemove'],
-                app: ['touchstart', 'touchend', 'touchmove']
-            };
-            ev = (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1) ?
-                ev.app :
-                ev.browser;
-            for (const e in ev) {
-                canvas.addEventListener(ev[e], CanvasGamepad.events, false);
-            }
-        },
-        listen(e) {
-            if (e.type) {
-                const type = e.type;
-                if (e.type.indexOf('mouse') != -1) {
-                    e.identifier = 'desktop';
-                    e = { touches: [e] };
-                }
-                for (var n = 0; n < (e.touches.length > 5 ? 5 : e.touches.length); n++) {
-                    var id = e.touches[n].identifier;
-                    if (!touches[id]) {
-                        touches[id] = {
-                            x: e.touches[n].pageX,
-                            y: e.touches[n].pageY
-                        };
-                    } else {
-                        touches[id].x = e.touches[n].pageX;
-                        touches[id].y = e.touches[n].pageY;
-                    }
-                }
-
-                /*
-				**
-				*/
-                for (var id in touches) {
-                    switch (type) {
-                        case 'touchstart':
-                        case 'touchmove':
-                            controller.stick.state(id);
-                            for (var n = 0; n < buttons_layout.length; n++) {
-                                controller.buttons.state(id, n);
-                            }
-                            break;
-                        case 'mousedown':
-                        case 'mousemove':
-                        case 'mouseup':
-                            controller.stick.state(id, type);
-                            for (var n = 0; n < buttons_layout.length; n++) {
-                                controller.buttons.state(id, n, type);
-                            }
-                            break;
-                    }
-                }
-
-                /*
-				** @description remove touchend from touches
-				*/
-                if (e.type == 'touchend') {
-                    var id = e.changedTouches[0].identifier;
-                    if (touches[id].id == 'stick') { controller.stick.reset(); }
-                    for (var n = 0; n < buttons_layout.length; n++) {
-                        if (touches[id].id == buttons_layout[n].name) {
-                            controller.buttons.reset(n);
-                        }
-                    }
-                    if (touches[id]) { delete touches[id]; }
-
-                    if (e.changedTouches.length > e.touches.length) {
-                        let length = 0;
-                        const delta = e.changedTouches.length - e.touches.length;
-                        for (var id in touches) {
-                            if (length >= delta) { delete touches[id]; }
-                            length++;
-                        }
-                    }
-                    if (e.touches.length == 0) {
-                        touches = {};
-                        for (var n = 0; n < buttons_layout.length; n++) {
-                            controller.buttons.reset(n);
-                        }
-                        controller.stick.reset();
-                    }
-                }
-            } else {
-	      const keys = e;
-	      let dir = 0;
-                for (const prop in keys) {
-	        switch (prop) {
-	          case '%':// left
-	            if (keys[prop]) { dir += 1; }
-	          break;
-	          case '&':// up
-	            if (keys[prop]) { dir += 2; }
-	          break;
-	          case "'":// right
-	            if (keys[prop]) { dir += 4; }
-	          break;
-	          case '(':// down
-	            if (keys[prop]) { dir += 8; }
-	          break;
-	          default:
-	            if (keys[prop]) {
-                                for (var n = 0; n < buttons_layout.length; n++) {
-                	if (buttons_layout[n].key) {
-                		if (buttons_layout[n].key == prop) {
-                                            touches[buttons_layout[n].name] = { id: buttons_layout[n].name, x: buttons_layout[n].hit.x[0] + buttons_layout[n].w / 2, y: buttons_layout[n].hit.y[0] + buttons_layout[n].h / 2 };
-                			controller.buttons.state(buttons_layout[n].name, n, 'mousedown');
-                		}
-                	}
-                                }
-                            } else if (!keys[prop]) {
-              		for (var n = 0; n < buttons_layout.length; n++) {
-                                    if (buttons_layout[n].key) {
-	                		if (buttons_layout[n].key == prop) {
-	                			controller.buttons.reset(n);
-	                			delete touches[buttons_layout[n].name];
-	                		}
-	                	}
-              		}
-              		delete keys[prop];
-              	}
-	          break;
-	        }
-                    controller.stick.dx = controller.stick.x;
-	        controller.stick.dy = controller.stick.y;
-                    switch (dir) {
-	          case 1:// left
-	            controller.stick.dx = controller.stick.x - controller.stick.radius / 2;
-	          break;
-	          case 2:// up
-	            controller.stick.dy = controller.stick.y - controller.stick.radius / 2;
-	          break;
-	          case 3:// left up
-	            controller.stick.dx = controller.stick.x - controller.stick.radius / 2;
-	            controller.stick.dy = controller.stick.y - controller.stick.radius / 2;
-	          break;
-	          case 4:// right
-	            controller.stick.dx = controller.stick.x + controller.stick.radius / 2;
-	          break;
-	          case 6:// right up
-	            controller.stick.dx = controller.stick.x + controller.stick.radius / 2;
-	            controller.stick.dy = controller.stick.y - controller.stick.radius / 2;
-	          break;
-	          case 8:// down
-	            controller.stick.dy = controller.stick.y + controller.stick.radius / 2;
-	          break;
-	          case 9:// left down
-	            controller.stick.dx = controller.stick.x - controller.stick.radius / 2;
-	            controller.stick.dy = controller.stick.y + controller.stick.radius / 2;
-	          break;
-	          case 12:// right down
-	            controller.stick.dx = controller.stick.x + controller.stick.radius / 2;
-	            controller.stick.dy = controller.stick.y + controller.stick.radius / 2;
-	          break;
-	          default:
-	            controller.stick.dx = controller.stick.x;
-	            controller.stick.dy = controller.stick.y;
-	          break;
-	        }
-	        if (dir != 0) {
-                        touches.stick = { id: 'stick' };
-		        controller.stick.state('stick', 'mousemove');
-	        } else {
-	        	controller.stick.reset();
-                        delete touches.stick;
-	        }
-                }
-            }
-
-            return events.broadcast();
-        },
-        broadcast() {
-            return map;
-        },
-        observe() {
-            return events.broadcast();
-        }
-    };
-
-    /*
-	** @property invert {method}
-	** @param color {string}
-	** @description invert color
-	*/
-    function invert(color) {
-
-    }
-
-
-    /*
-	** @property helper {object}
-	** @description display debug and trace info
-	*/
-    var helper = {
-        debug() {
-            let dy = 15;
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            ctx.font = bit.medium;
-            ctx.fillText('debug', 10, dy);
-            ctx.font = bit.small;
-            dy += 5;
-            for (const prop in touches) {
-                dy += 10;
-                const text = `${prop} : ${JSON.stringify(touches[prop]).slice(1, -1)}`;
-                ctx.fillText(text, 10, dy);
-            }
-        },
-        trace() {
-            let dy = 15;
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'middle';
-            ctx.font = bit.medium;
-            ctx.fillText('trace', width - 10, dy);
-            ctx.font = bit.small;
-            dy += 5;
-            for (const prop in map) {
-                dy += 10;
-                const text = `${prop} : ${map[prop]}`;
-
-                ctx.fillText(text, width - 10, dy);
-            }
-        }
-    };
-
-    /*
-	**
-	*/
-    function css() {
-        const style = document.createElement('style');
-        style.innerHTML = `${''
-		+ '\n@font-face {'
-		+ "\n\t\tfont-family: 'bit';"
+function css() {
+    const style = document.createElement('style');
+    style.innerHTML = `${''
+        + '\n@font-face {'
+        + "\n\t\tfont-family: 'bit';"
     + '\n\t\tsrc: url('}${bit}) format('truetype');`
     + '\n\t\tfont-weight: normal;'
     + '\n\t\tfont-style: normal;'
-		+ '}'
-		+ '\n'
+        + '}'
+        + '\n'
     + '* {'
     + '\n\t\tpadding: 0;'
     + '\n\t\tmargin: 0;'
@@ -871,51 +276,638 @@ const CanvasGamepad = (function () {
     + '\n\t\tposition:fixed;'
     + '\n}'
     + '\n';
-        document.head.appendChild(style);
+    document.head.appendChild(style);
 
-        bit = {
-            button: "18px 'bit'",
-            small: "12px 'bit'",
-            medium: "16px 'bit'",
-            large: "24px 'bit'",
-            huge: "48px 'bit'"
-        };
+    bit = {
+        button: "18px 'bit'",
+        small: "12px 'bit'",
+        medium: "16px 'bit'",
+        large: "24px 'bit'",
+        huge: "48px 'bit'"
+    };
+}
+
+const controller = {
+    init() {
+        const layoutString = layout;
+        let shift = null;
+        layout = { x: 0, y: 0 };
+        switch (layoutString) {
+            case 'TOP_LEFT':
+                shift = 0;
+                buttonsLayout.forEach((button) => {
+                    if (button.r) {
+                        shift += button.r;
+                        button.y -= button.r * 2; // eslint-disable-line no-param-reassign
+                    }
+                });
+                layout.x = shift + buttonLayout.x;
+                layout.y = 0 + buttonLayout.y;
+                break;
+            case 'TOP_RIGHT':
+                layout.x = width - buttonLayout.x;
+                layout.y = 0 + buttonLayout.y;
+                break;
+            case 'BOTTOM_LEFT':
+                shift = 0;
+                buttonsLayout.forEach((button) => {
+                    if (button.r) {
+                        shift += button.r;
+                    }
+                });
+                layout.x = shift + buttonLayout.x;
+                layout.y = height - buttonLayout.y;
+                break;
+            case 'BOTTOM_RIGHT':
+                layout.x = width - buttonLayout.x;
+                layout.y = height - buttonLayout.y;
+                break;
+            default: break;
+        }
+
+        controller.buttons.init();
+        if (joystick) { controller.stick.init(); }
+    },
+    buttons: {
+        init() {
+            let x;
+            let y;
+            for (let n = 0; n < buttonsLayout.length; n += 1) {
+                const button = buttonsLayout[n];
+                x = layout.x - button.x;
+                y = layout.y - button.y;
+                const { r } = button;
+                if (r) {
+                    buttonsLayout[n].hit = {
+                        x: [x - r, x + (r * 2)],
+                        y: [y - r, y + (r * 2)],
+                        active: false
+                    };
+                } else {
+                    button.x = (width / 2) - button.w;
+                    if (start && select) {
+                        switch (button.name) {
+                            case 'select':
+                                button.x = (width / 2) - button.w - (button.h * 2);
+                                break;
+                            case 'start':
+                                button.x = width / 2;
+                                break;
+                            default: break;
+                        }
+                    }
+                    x = button.x; // eslint-disable-line prefer-destructuring
+                    y = layout.y - button.y;
+                    buttonsLayout[n].hit = {
+                        x: [x, x + button.w],
+                        y: [y, y + button.h],
+                        active: false
+                    };
+                }
+                map[button.name] = 0;
+            }
+        },
+        draw() {
+            for (let n = 0; n < buttonsLayout.length; n += 1) {
+                const button = buttonsLayout[n];
+                const { color } = button;
+
+                let x = layout.x - button.x;
+                let y = layout.y - button.y;
+                let w;
+                button.dx = x;
+                button.dy = y;
+
+                let { r } = button;
+                if (r) {
+                    if (button.hit) {
+                        if (button.hit.active) {
+                            ctx.fillStyle = color;
+                            ctx.beginPath();
+                            ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
+                            ctx.fill();
+                            ctx.closePath();
+                        }
+                    }
+
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.fillStyle = 'rgba(255,255,255,1)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = bit.button;
+                    ctx.fillText(button.name, x, y);
+                } else {
+                    const { h } = button;
+                    w = button.w; // eslint-disable-line prefer-destructuring
+                    x = button.x; // eslint-disable-line prefer-destructuring
+                    y = button.dy;
+                    r = 10;
+                    ctx.fillStyle = color;
+                    if (button.hit) {
+                        if (button.hit.active) {
+                            ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
+                        }
+                    }
+                    ctx.roundRect(x, y, w, h, r).fill();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = bit.button;
+                    ctx.fillText(button.name, x + (w / 2), y + (h * 2));
+                }
+
+                if (button.key && hint) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = bit.button;
+                    if (button.name === 'start' || button.name === 'select') {
+                        x += w / 2;
+                    }
+                    ctx.fillText(button.key, x, y - (r * 1.5));
+                }
+            }
+        },
+        state(id, n, type) {
+            if (touches[id].id !== 'stick') {
+                const touch = {
+                    x: touches[id].x,
+                    y: touches[id].y
+                };
+                const button = buttonsLayout[n];
+                const { name } = button;
+
+                const dx = parseInt(touch.x - button.dx, 10);
+                const dy = parseInt(touch.y - button.dy, 10);
+                let dist = width;
+                if (button.r) {
+                    dist = parseInt(Math.sqrt((dx * dx) + (dy * dy)), 10);
+                } else if (
+                    touch.x > button.hit.x[0] &&
+                    touch.x < button.hit.x[1] &&
+                    touch.y > button.hit.y[0] &&
+                    touch.y < button.hit.y[1]
+                ) {
+                    dist = 0;
+                }
+                if (dist < radius && touches[id].id !== 'stick') {
+                    if (!type) {
+                        touches[id].id = name;
+                    } else {
+                        switch (type) {
+                            case 'mousedown':
+                                touches[id].id = name;
+                                break;
+                            case 'mouseup':
+                                delete touches[id].id;
+                                controller.buttons.reset(n);
+                                break;
+                            default: break;
+                        }
+                    }
+                }
+                if (touches[id].id === name) {
+                    map[name] = 1;
+                    button.hit.active = true;
+                    if (dist > radius) {
+                        button.hit.active = false;
+                        map[name] = 0;
+                        delete touches[id].id;
+                    }
+                }
+            }
+        },
+        reset(n) {
+            const button = buttonsLayout[n];
+            const { name } = button;
+            button.hit.active = false;
+            map[name] = 0;
+        }
+    },
+    stick: {
+        radius: 40,
+        x: 0,
+        y: 0,
+        dx: 0,
+        dy: 0,
+        init() {
+            this.radius = 40;
+            this.x = (width) - (layout.x);
+            this.y = layout.y;
+            this.dx = this.x;
+            this.dy = this.y;
+            map['x-dir'] = 0;
+            map['y-dir'] = 0;
+            map['x-axis'] = 0;
+            map['y-axis'] = 0;
+        },
+        draw() {
+            ctx.fillStyle = colors.joystick.base;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.fillStyle = colors.joystick.dust;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.fillStyle = colors.joystick.stick;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.fillStyle = colors.joystick.ball;
+            ctx.beginPath();
+            ctx.arc(this.dx, this.dy, this.radius - 10, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+        },
+        state(id, type) {
+            const touch = {
+                x: touches[id].x,
+                y: touches[id].y
+            };
+            const dx = parseInt(touch.x - this.x, 10);
+            const dy = parseInt(touch.y - this.y, 10);
+            const dist = parseInt(Math.sqrt((dx * dx) + (dy * dy)), 10);
+            if (dist < (this.radius * 1.5)) {
+                if (!type) {
+                    touches[id].id = 'stick';
+                } else {
+                    switch (type) {
+                        case 'mousedown':
+                            touches[id].id = 'stick';
+                            break;
+                        case 'mouseup':
+                            delete touches[id].id;
+                            controller.stick.reset();
+                            break;
+                        default: break;
+                    }
+                }
+            }
+            if (touches[id].id === 'stick') {
+                if (Math.abs(parseInt(dx, 10)) < (this.radius / 2)) { this.dx = this.x + dx; }
+                if (Math.abs(parseInt(dy, 10)) < (this.radius / 2)) { this.dy = this.y + dy; }
+                map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
+                map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
+                map['x-dir'] = Math.round(map['x-axis']);
+                map['y-dir'] = Math.round(map['y-axis']);
+
+                if (dist > (this.radius * 1.5)) {
+                    controller.stick.reset();
+                    delete touches[id].id;
+                }
+            }
+        },
+        reset() {
+            this.dx = this.x;
+            this.dy = this.y;
+            map['x-dir'] = 0;
+            map['y-dir'] = 0;
+            map['x-axis'] = 0;
+            map['y-axis'] = 0;
+        }
+    }
+};
+
+function init() {
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = bit.small;
+    ctx.fillText('loading', width / 2, height / 2);
+    if (joystick) { controller.stick.draw(); }
+    controller.buttons.draw();
+    setTimeout(() => { ready = true; }, 250);
+}
+
+function setup(config) {
+    const { length } = Object.keys(config);
+    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, false);
+    css();
+
+    if (length) {
+        stage[config.canvas ? 'assign' : 'create'](config.canvas);
+        Object.entries(config).forEach(([key, value]) => {
+            switch (key) {
+                case 'debug':
+                case 'trace':
+                case 'layout':
+                case 'start':
+                case 'select':
+                case 'hidden':
+                case 'joystick':
+                case 'hint': break;
+                case 'buttons':
+                    buttons = value.length - 1;
+                    if (value.length > buttonsLayout.length) {
+                        buttons = buttonsLayout.length - 1;
+                    }
+                    buttonsLayout = buttonsLayout[buttons];
+                    value.forEach(({ name, color, key: btnKey }, index) => {
+                        if (name) {
+                            buttonsLayout[index].name = name;
+                        }
+                        if (color) {
+                            buttonsLayout[index].color = color;
+                        }
+
+                        if (key) {
+                            buttonsLayout[index].key = btnKey;
+                        }
+                        buttonsLayoutBuilt = true;
+                    });
+                    break;
+                default: break;
+            }
+        });
+    } else {
+        stage.create();
+    }
+    if (!buttonsLayoutBuilt) {
+        buttonsLayout = buttonsLayout[buttons];
     }
 
-    /*
-  ** @method loop {method}
-  ** @description this is the
-  */
+    if (start) { buttonsLayout.push(startButton); }
+    if (select) { buttonsLayout.push(selectButton); }
 
-    (function loop() {
-        toggle = !toggle;
-        if (toggle) {
-            requestAnimationFrame(loop);
-            return;
+    events.bind();
+    controller.init();
+    init();
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!hidden) {
+        if (debug) { helper.debug(); }
+        if (trace) { helper.trace(); }
+        if (joystick) { controller.stick.draw(); }
+        controller.buttons.draw();
+    }
+}
+
+const events = {
+    bind() {
+        const eventNames = ['mousedown', 'mouseup', 'mousemove', 'touchstart', 'touchend', 'touchmove'];
+        eventNames.forEach(eventName => canvas.addEventListener(eventName, CanvasGamepad.events));
+    },
+    listen(event) {
+        let e = event;
+        const eventType = e.type;
+        let id;
+        if (eventType) {
+            if (eventType.includes('mouse')) {
+                e.identifier = 'desktop';
+                e = { touches: [e] };
+            }
+            for (let n = 0; n < (e.touches.length > 5 ? 5 : e.touches.length); n += 1) {
+                id = e.touches[n].identifier;
+                if (!touches[id]) {
+                    touches[id] = {
+                        x: e.touches[n].pageX,
+                        y: e.touches[n].pageY
+                    };
+                } else {
+                    touches[id].x = e.touches[n].pageX;
+                    touches[id].y = e.touches[n].pageY;
+                }
+            }
+            Object.keys(touches).forEach((i) => {
+                switch (eventType) {
+                    case 'touchstart':
+                    case 'touchmove':
+                        controller.stick.state(i);
+                        buttonsLayout.forEach((ns, idx) => controller.buttons.state(i, idx));
+                        break;
+                    case 'mousedown':
+                    case 'mousemove':
+                    case 'mouseup':
+                        controller.stick.state(i, eventType);
+                        buttonsLayout.forEach((ns, idx) => (
+                            controller.buttons.state(i, idx, eventType)
+                        ));
+                        break;
+                    default: break;
+                }
+            });
+
+            /*
+            ** @description remove touchend from touches
+            */
+            if (e.type === 'touchend') {
+                id = e.changedTouches[0].identifier;
+                if (touches[id].id === 'stick') {
+                    controller.stick.reset();
+                }
+                for (let n = 0; n < buttonsLayout.length; n += 1) {
+                    if (touches[id].id === buttonsLayout[n].name) {
+                        controller.buttons.reset(n);
+                    }
+                }
+                if (touches[id]) { delete touches[id]; }
+
+                if (e.changedTouches.length > e.touches.length) {
+                    let length = 0;
+                    const delta = e.changedTouches.length - e.touches.length;
+                    Object.entries(touches).forEach(([key]) => {
+                        if (length >= delta) {
+                            delete touches[key];
+                        }
+                        length += 1;
+                    });
+                }
+                if (e.touches.length === 0) {
+                    touches = {};
+                    for (let n = 0; n < buttonsLayout.length; n += 1) {
+                        controller.buttons.reset(n);
+                    }
+                    controller.stick.reset();
+                }
+            }
+        } else {
+            const keys = e;
+            let dir = 0;
+            Object.entries(keys).forEach(([prop]) => {
+                switch (prop) {
+                    case '%':// left
+                        if (keys[prop]) { dir += 1; }
+                        break;
+                    case '&':// up
+                        if (keys[prop]) { dir += 2; }
+                        break;
+                    case "'":// right
+                        if (keys[prop]) { dir += 4; }
+                        break;
+                    case '(':// down
+                        if (keys[prop]) { dir += 8; }
+                        break;
+                    default:
+                        if (keys[prop]) {
+                            for (let n = 0; n < buttonsLayout.length; n += 1) {
+                                if (buttonsLayout[n].key) {
+                                    if (buttonsLayout[n].key === prop) {
+                                        touches[buttonsLayout[n].name] = {
+                                            id: buttonsLayout[n].name,
+                                            x: buttonsLayout[n].hit.x[0] + (buttonsLayout[n].w / 2),
+                                            y: buttonsLayout[n].hit.y[0] + (buttonsLayout[n].h / 2)
+                                        };
+                                        controller.buttons.state(buttonsLayout[n].name, n, 'mousedown');
+                                    }
+                                }
+                            }
+                        } else if (!keys[prop]) {
+                            for (let n = 0; n < buttonsLayout.length; n += 1) {
+                                if (buttonsLayout[n].key) {
+                                    if (buttonsLayout[n].key === prop) {
+                                        controller.buttons.reset(n);
+                                        delete touches[buttonsLayout[n].name];
+                                    }
+                                }
+                            }
+                            delete keys[prop];
+                        }
+                        break;
+                }
+                controller.stick.dx = controller.stick.x;
+                controller.stick.dy = controller.stick.y;
+                switch (dir) {
+                    case 1:// left
+                        controller.stick.dx = controller.stick.x - (controller.stick.radius / 2);
+                        break;
+                    case 2:// up
+                        controller.stick.dy = controller.stick.y - (controller.stick.radius / 2);
+                        break;
+                    case 3:// left up
+                        controller.stick.dx = controller.stick.x - (controller.stick.radius / 2);
+                        controller.stick.dy = controller.stick.y - (controller.stick.radius / 2);
+                        break;
+                    case 4:// right
+                        controller.stick.dx = controller.stick.x + (controller.stick.radius / 2);
+                        break;
+                    case 6:// right up
+                        controller.stick.dx = controller.stick.x + (controller.stick.radius / 2);
+                        controller.stick.dy = controller.stick.y - (controller.stick.radius / 2);
+                        break;
+                    case 8:// down
+                        controller.stick.dy = controller.stick.y + (controller.stick.radius / 2);
+                        break;
+                    case 9:// left down
+                        controller.stick.dx = controller.stick.x - (controller.stick.radius / 2);
+                        controller.stick.dy = controller.stick.y + (controller.stick.radius / 2);
+                        break;
+                    case 12:// right down
+                        controller.stick.dx = controller.stick.x + (controller.stick.radius / 2);
+                        controller.stick.dy = controller.stick.y + (controller.stick.radius / 2);
+                        break;
+                    default:
+                        controller.stick.dx = controller.stick.x;
+                        controller.stick.dy = controller.stick.y;
+                        break;
+                }
+                if (dir !== 0) {
+                    touches.stick = { id: 'stick' };
+                    controller.stick.state('stick', 'mousemove');
+                } else {
+                    controller.stick.reset();
+                    delete touches.stick;
+                }
+            });
         }
-        if (ready) { draw(); }
-        requestAnimationFrame(loop);
-    }());
 
-    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
-	  if (w < 2 * r) r = w / 2;
-	  if (h < 2 * r) r = h / 2;
-	  this.beginPath();
-	  this.moveTo(x + r, y);
-	  this.arcTo(x + w, y, x + w, y + h, r);
-	  this.arcTo(x + w, y + h, x, y + h, r);
-	  this.arcTo(x, y + h, x, y, r);
-	  this.arcTo(x, y, x + w, y, r);
-	  this.closePath();
-	  return this;
-    };
+        return events.broadcast();
+    },
+    broadcast() {
+        return map;
+    },
+    observe() {
+        return events.broadcast();
+    }
+};
 
-    return {
-  	setup(config) { setup(config); },
-        draw() { draw(); },
-        events(e) { return events.listen(e); },
-        observe() { return events.observe(); }
-    };
+let helper = {
+    debug() {
+        let dy = 15;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = bit.medium;
+        ctx.fillText('debug', 10, dy);
+        ctx.font = bit.small;
+        dy += 5;
+        Object.keys(touches).forEach((prop) => {
+            dy += 10;
+            const text = `${prop} : ${JSON.stringify(touches[prop]).slice(1, -1)}`;
+            ctx.fillText(text, 10, dy);
+        });
+    },
+    trace() {
+        let dy = 15;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.font = bit.medium;
+        ctx.fillText('trace', width - 10, dy);
+        ctx.font = bit.small;
+        dy += 5;
+        Object.keys(map).forEach((prop) => {
+            dy += 10;
+            const text = `${prop} : ${map[prop]}`;
+
+            ctx.fillText(text, width - 10, dy);
+        });
+    }
+};
+
+(function loop() {
+    toggle = !toggle;
+    if (toggle) {
+        window.requestAnimationFrame(loop);
+        return;
+    }
+    if (ready) { draw(); }
+    window.requestAnimationFrame(loop);
 }());
+
+window.CanvasRenderingContext2D.prototype.roundRect = function roundRect(x, y, w, h, r) {
+    let rad;
+    if (w < 2 * r) {
+        rad = w / 2;
+    }
+    if (h < 2 * r) {
+        rad = h / 2;
+    }
+
+    this.beginPath();
+    this.moveTo(x + rad, y);
+    this.arcTo(x + w, y, x + w, y + h, rad);
+    this.arcTo(x + w, y + h, x, y + h, rad);
+    this.arcTo(x, y + h, x, y, rad);
+    this.arcTo(x, y, x + w, y, rad);
+    this.closePath();
+    return this;
+};
+
+const CanvasGamepad = {
+    setup,
+    draw,
+    events: e => events.listen(e),
+    observe: () => events.observe()
+};
 
 export default CanvasGamepad;
