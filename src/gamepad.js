@@ -2,44 +2,31 @@ import font from './font';
 
 let bit = font;
 
-var CanvasGamepad = (function () {
+const CanvasGamepad = (function () {
     let canvas = null;
     let ctx;
+    const px = 0;
+    const py = 0;
 
-    /*
-	** @param px {int}
-	** @param py {int}
-	*/
-    let px = 0;
-    let py = 0;
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     /*
 	** @param scale {array}
 	*/
-    let scale = [
+    const scale = [
         (window.innerWidth / width),
         (window.innerHeight / height)
     ];
 
     /*
-	**
-	*/
-
-    /*
 	** @param bit {object}
 	** @description 8 bit font used in application
 	*/
-    let font = {};
+    const font = {};
 
-
-    /*
-	**
-	*/
     let touches = {};
-    let map = {};
+    const map = {};
 
     /*
   ** @param toggle {boolean}
@@ -54,21 +41,21 @@ var CanvasGamepad = (function () {
     /*
   ** @param hint {boolean}
   */
-    let hint = false;
+    const hint = false;
 
     /*
-	** @param debug {boolean}
+	* @param debug {boolean}
 	*/
-    let debug = false;
+    const debug = false;
     /*
 	** @param debug {boolean}
 	*/
-    let trace = false;
+    const trace = false;
 
     /*
 	** @param hidden {boolean}
 	*/
-    let hidden = false;
+    const hidden = false;
 
     /*
 	** @param position {string}
@@ -81,30 +68,30 @@ var CanvasGamepad = (function () {
     /*
 	** @param radius {int}
 	*/
-    let radius = 25;
+    const radius = 25;
 
     /*
 	** @param opacity {float} (0.0 -> 1.0)
 	** @description opacity
 	*/
-    let opacity = 0.4;
+    const opacity = 0.4;
 
     /*
 	** @param colors {object}
 	** @description color collection used in app in rgba format
 	*/
-    let colors = {
-        red: 'rgba(255,0,0,' + opacity + ')',
-        green: 'rgba(0,255,0,' + opacity + ')',
-        blue: 'rgba(0,0,255,' + opacity + ')',
-        purple: 'rgba(255,0,255,' + opacity + ')',
-        yellow: 'rgba(255,255,0,' + opacity + ')',
-        cyan: 'rgba(0,255,255,' + opacity + ')',
-        black: 'rgba(0,0,0,' + opacity + ')',
-        white: 'rgba(255,255,255,' + opacity + ')',
+    const colors = {
+        red: `rgba(255,0,0,${opacity})`,
+        green: `rgba(0,255,0,${opacity})`,
+        blue: `rgba(0,0,255,${opacity})`,
+        purple: `rgba(255,0,255,${opacity})`,
+        yellow: `rgba(255,255,0,${opacity})`,
+        cyan: `rgba(0,255,255,${opacity})`,
+        black: `rgba(0,0,0,${opacity})`,
+        white: `rgba(255,255,255,${opacity})`,
         joystick: {
-            base: 'rgba(0,0,0,' + opacity + ')',
-            dust: 'rgba(0,0,0,' + opacity + ')',
+            base: `rgba(0,0,0,${opacity})`,
+            dust: `rgba(0,0,0,${opacity})`,
             stick: 'rgba(204,204,204,1)',
             ball: 'rgba(255,255,255,1)'
         }
@@ -121,47 +108,47 @@ var CanvasGamepad = (function () {
     let buttons_layout = [
         [
             {
-x: 0, y: 0, r: radius, color: colors.red, name: 'a'
-}
+                x: 0, y: 0, r: radius, color: colors.red, name: 'a'
+            }
         ],
         [
             {
- x: -(radius / 4), y: radius + (radius / 2), r: radius, color: colors.red, name: 'a'
-},
+                x: -(radius / 4), y: radius + (radius / 2), r: radius, color: colors.red, name: 'a'
+            },
             {
-x: (radius + (radius / 0.75)), y: -radius + (radius / 2), r: radius, color: colors.green, name: 'b'
- }
+                x: (radius + (radius / 0.75)), y: -radius + (radius / 2), r: radius, color: colors.green, name: 'b'
+            }
         ],
         [
             {
- x: -radius * 0.75, y: radius * 2, r: radius, color: colors.red, name: 'a'
- },
+                x: -radius * 0.75, y: radius * 2, r: radius, color: colors.red, name: 'a'
+            },
             {
- x: radius * 1.75, y: radius, r: radius, color: colors.green, name: 'b'
-},
+                x: radius * 1.75, y: radius, r: radius, color: colors.green, name: 'b'
+            },
             {
-x: radius * 3.5, y: -radius, r: radius, color: colors.blue, name: 'c'
- }
+                x: radius * 3.5, y: -radius, r: radius, color: colors.blue, name: 'c'
+            }
         ],
         [
             {
-x: -radius, y: radius, r: radius, color: colors.red, name: 'a'
- },
+                x: -radius, y: radius, r: radius, color: colors.red, name: 'a'
+            },
             {
-x: radius * 2 - radius, y: -(radius + (radius)) + radius, r: radius, color: colors.green, name: 'b'
-},
+                x: radius * 2 - radius, y: -(radius + (radius)) + radius, r: radius, color: colors.green, name: 'b'
+            },
             {
-x: radius * 2 - radius, y: (radius + radius) + radius, r: radius, color: colors.blue, name: 'x'
- },
+                x: radius * 2 - radius, y: (radius + radius) + radius, r: radius, color: colors.blue, name: 'x'
+            },
             {
-x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
- }
+                x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
+            }
         ]
     ];
     /*
 	** @param button_offset {object}
 	*/
-    let button_offset = { x: (radius * 3), y: (radius * 3) };
+    const button_offset = { x: (radius * 3), y: (radius * 3) };
     /*
 	** @param buttons_layout_built {boolean}
 	*/
@@ -170,23 +157,23 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
     /*
 	** @param start {boolean}
 	*/
-    let start = true;
-    let start_button = {
- x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'start'
-};
+    const start = true;
+    const start_button = {
+        x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'start'
+    };
 
     /*
 	** @param start {boolean}
 	*/
-    let select = false;
-    let select_button = {
- x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'select'
-};
+    const select = false;
+    const select_button = {
+        x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'select'
+    };
 
     /*
 	** @param hidden {boolean}
 	*/
-    let joystick = true;
+    const joystick = true;
 
  	/*
 	** @method setup
@@ -211,18 +198,18 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
                     case 'hint':
                         switch (typeof config[prop]) {
                             case 'string':
-                                eval(`${prop  }='${  config[prop]  }'`);
+                                eval(`${prop}='${config[prop]}'`);
                                 break;
                             case 'boolean':
                             case 'number':
-                                eval(`${prop  }=${  config[prop]}`);
+                                eval(`${prop}=${config[prop]}`);
                                 break;
                             case 'object':
                                 switch (prop) {
                                     case 'start':
                                     case 'select':
-                                        eval(`${prop  }=${  true}`);
-                                        eval(`${prop  }_button.key="${  config[prop].key  }"`);
+                                        eval(`${prop}=${true}`);
+                                        eval(`${prop}_button.key="${config[prop].key}"`);
                                         break;
                                 }
                                 break;
@@ -230,14 +217,14 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
                         break;
                     case 'buttons':
                         buttons = config[prop].length - 1;
-                        if (config[prop].length > buttons_layout.length) { buttons = buttons_layout.length - 1 ;}
+                        if (config[prop].length > buttons_layout.length) { buttons = buttons_layout.length - 1; }
                         buttons_layout = buttons_layout[buttons];
                         for (let n = 0; n < buttons + 1; n++) {
-                            let button = config[prop][n];
+                            const button = config[prop][n];
                             if (button.name) { buttons_layout[n].name = button.name; }
-							if (button.color) { buttons_layout[n].color = button.color; }
-							if (button.key) { buttons_layout[n].key = button.key; }
-							buttons_layout_built = true;
+                            if (button.color) { buttons_layout[n].color = button.color; }
+                            if (button.key) { buttons_layout[n].key = button.key; }
+                            buttons_layout_built = true;
                         }
                         break;
                 }
@@ -251,10 +238,10 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
         }
         if (!buttons_layout_built) { buttons_layout = buttons_layout[buttons]; }
 
-		if (start) { buttons_layout.push(start_button); }
-		if (select) { buttons_layout.push(select_button); }
+        if (start) { buttons_layout.push(start_button); }
+        if (select) { buttons_layout.push(select_button); }
 
-		events.bind();
+        events.bind();
         controller.init();
         init();
     }
@@ -274,49 +261,46 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
         ctx.fillText('loading', width / 2, height / 2);
         if (joystick) { controller.stick.draw(); }
         controller.buttons.draw();
-        setTimeout(() => {ready = true;}, 250);
+        setTimeout(() => { ready = true; }, 250);
     }
 
  	/*
 	** @method setup
 	** @description
 	*/
-	function draw() {
+    function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (!hidden) {
             if (debug) { helper.debug(); }
-			if (trace) { helper.trace(); }
-			if (joystick) { controller.stick.draw(); }
+            if (trace) { helper.trace(); }
+            if (joystick) { controller.stick.draw(); }
             controller.buttons.draw();
         }
     }
 
-	/*
+    /*
 	** @property stage {object}
 	** @description used to create and assign canvas object
 	*/
-	var stage = {
-        create(id)
-		{
-			var id = id || "CanvasGamepad";
-			canvas = document.createElement('canvas');
-			canvas.setAttribute("id", id);
-			document.body.appendChild(canvas);
-			stage.assign(id)
-		},
-        assign(id)
-		{
-			if(!document.getElementById(id)){stage.create(id);}
-			canvas = document.getElementById(id);
-			stage.adjust();
-		},
-        adjust()
-		{
-			ctx = canvas.getContext('2d');
-			ctx.canvas.width = width*scale[0];
-			ctx.canvas.height = height*scale[1];
-			ctx.scale(scale[0], scale[1]);
-		}
+    var stage = {
+        create(id) {
+            var id = id || 'CanvasGamepad';
+            canvas = document.createElement('canvas');
+            canvas.setAttribute('id', id);
+            document.body.appendChild(canvas);
+            stage.assign(id);
+        },
+        assign(id) {
+            if (!document.getElementById(id)) { stage.create(id); }
+            canvas = document.getElementById(id);
+            stage.adjust();
+        },
+        adjust() {
+            ctx = canvas.getContext('2d');
+            ctx.canvas.width = width * scale[0];
+            ctx.canvas.height = height * scale[1];
+            ctx.scale(scale[0], scale[1]);
+        }
     };
 
     /*
@@ -324,234 +308,194 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
 	** @description used to draw the controller
 	*/
     var controller = {
-        init()
-		{
-			var layout_string = layout;
-			layout = {x:0,y:0};
-			switch(layout_string)
-			{
-				case "TOP_LEFT":
-					var shift = 0;
-					for(var n = 0; n < buttons_layout.length; n++)
-					{
-						if(buttons_layout[n].r)
-						{
-							shift += buttons_layout[n].r;
-							buttons_layout[n].y -= buttons_layout[n].r*2;
-						}
-					}
-					layout.x = shift + button_offset.x;
-					layout.y = 0 + button_offset.y;
-				break;
-				case "TOP_RIGHT":
-					layout.x = width - button_offset.x;
-					layout.y = 0 + button_offset.y;
-				break;
-				case "BOTTOM_LEFT":
-					var shift = 0;
-					for(var n = 0; n < buttons_layout.length; n++)
-					{
-						if(buttons_layout[n].r)
-						{
-							shift += buttons_layout[n].r
-						}
-					}
-					layout.x = shift + button_offset.x;
-					layout.y = height - button_offset.y;
-				break;
-				case "BOTTOM_RIGHT":
-					layout.x = width - button_offset.x;
-					layout.y = height - button_offset.y;
-				break;
-			}
+        init() {
+            const layout_string = layout;
+            layout = { x: 0, y: 0 };
+            switch (layout_string) {
+                case 'TOP_LEFT':
+                    var shift = 0;
+                    for (var n = 0; n < buttons_layout.length; n++) {
+                        if (buttons_layout[n].r) {
+                            shift += buttons_layout[n].r;
+                            buttons_layout[n].y -= buttons_layout[n].r * 2;
+                        }
+                    }
+                    layout.x = shift + button_offset.x;
+                    layout.y = 0 + button_offset.y;
+                    break;
+                case 'TOP_RIGHT':
+                    layout.x = width - button_offset.x;
+                    layout.y = 0 + button_offset.y;
+                    break;
+                case 'BOTTOM_LEFT':
+                    var shift = 0;
+                    for (var n = 0; n < buttons_layout.length; n++) {
+                        if (buttons_layout[n].r) {
+                            shift += buttons_layout[n].r;
+                        }
+                    }
+                    layout.x = shift + button_offset.x;
+                    layout.y = height - button_offset.y;
+                    break;
+                case 'BOTTOM_RIGHT':
+                    layout.x = width - button_offset.x;
+                    layout.y = height - button_offset.y;
+                    break;
+            }
 
-			controller.buttons.init();
-			if(joystick){controller.stick.init();}
-		},
+            controller.buttons.init();
+            if (joystick) { controller.stick.init(); }
+        },
         buttons: {
-            init()
-			{
-				for(var n = 0; n < buttons_layout.length; n++)
-				{
-					var button = buttons_layout[n];
-					var x = layout.x - button.x;
-					var y = layout.y - button.y;
-					if(button.r)
-					{
-						var r = button.r;
-						buttons_layout[n]["hit"] = {x:[x-r, x+(r*2)], y:[y-r, y+(r*2)], active:false};
-					}
-					else
-					{
-						button.x = width/2 - (button.w);
-						if(start && select)
-						{
-							switch(button.name)
-							{
-								case "select":
-									button.x = width/2 - (button.w) - (button.h*2);
-								break;
-								case "start":
-									button.x = width/2;
-								break;
-							}
-						}
-						var x = button.x;
-						var y = layout.y - button.y;
-						buttons_layout[n]["hit"] = {x:[x, x+button.w], y:[y, y+button.h], active:false};
-					}
-					map[button.name] = 0;
-				}
-			},
-            draw()
-			{
-				for(var n = 0; n < buttons_layout.length; n++)
-				{
-					var button = buttons_layout[n];
-					var name = button.name;
-					var color = button.color;
+            init() {
+                for (let n = 0; n < buttons_layout.length; n++) {
+                    const button = buttons_layout[n];
+                    var x = layout.x - button.x;
+                    var y = layout.y - button.y;
+                    if (button.r) {
+                        const r = button.r;
+                        buttons_layout[n].hit = { x: [x - r, x + (r * 2)], y: [y - r, y + (r * 2)], active: false };
+                    } else {
+                        button.x = width / 2 - (button.w);
+                        if (start && select) {
+                            switch (button.name) {
+                                case 'select':
+                                    button.x = width / 2 - (button.w) - (button.h * 2);
+                                    break;
+                                case 'start':
+                                    button.x = width / 2;
+                                    break;
+                            }
+                        }
+                        var x = button.x;
+                        var y = layout.y - button.y;
+                        buttons_layout[n].hit = { x: [x, x + button.w], y: [y, y + button.h], active: false };
+                    }
+                    map[button.name] = 0;
+                }
+            },
+            draw() {
+                for (let n = 0; n < buttons_layout.length; n++) {
+                    const button = buttons_layout[n];
+                    const name = button.name;
+                    const color = button.color;
 
-					var x = layout.x - button.x;
-					var y = layout.y - button.y;
-					button.dx = x;
-					button.dy = y;
+                    var x = layout.x - button.x;
+                    var y = layout.y - button.y;
+                    button.dx = x;
+                    button.dy = y;
 
-					if(button.r)
-					{
-						var r = button.r;
+                    if (button.r) {
+                        var r = button.r;
 
-						if(button.hit)
-						{
-							if(button.hit.active)
-							{
-								ctx.fillStyle = color;
-								ctx.beginPath();
-								ctx.arc(x, y, r+5, 0, 2 * Math.PI, false);
-								ctx.fill();
-								ctx.closePath();
-							}
-						}
+                        if (button.hit) {
+                            if (button.hit.active) {
+                                ctx.fillStyle = color;
+                                ctx.beginPath();
+                                ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
+                                ctx.fill();
+                                ctx.closePath();
+                            }
+                        }
 
-						ctx.fillStyle = color;
-						ctx.beginPath();
-						ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-						ctx.fill();
-						ctx.closePath();
-						ctx.strokeStyle=color;
-						ctx.lineWidth = 2;
-						ctx.stroke();
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+                        ctx.fill();
+                        ctx.closePath();
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
 
-						ctx.fillStyle = "rgba(255,255,255,1)";
-						ctx.textAlign = "center";
-						ctx.textBaseline = "middle";
-						ctx.font = bit.button;
-						ctx.fillText(button.name, x, y);
-					}
-					else
-					{
-						var w = button.w;
-						var h = button.h;
-						var x = button.x;
-						var y = button.dy;
-						var r = 10;
-						ctx.fillStyle = color;
-						if(button.hit)
-						{
-							if(button.hit.active)
-							{
-								ctx.roundRect(x-5, y-5, w+10, h+10, r*2).fill();
-							}
-						}
-						ctx.roundRect(x, y, w, h, r).fill();
-						ctx.strokeStyle=color;
-						ctx.lineWidth = 2;
-						ctx.stroke();
-						ctx.fillStyle = "rgba(0,0,0,0.5)";
-						ctx.textAlign = "center";
-						ctx.textBaseline = "middle";
-						ctx.font = bit.button;
-						ctx.fillText(button.name, x+w/2, y+(h*2));
-					}
+                        ctx.fillStyle = 'rgba(255,255,255,1)';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = bit.button;
+                        ctx.fillText(button.name, x, y);
+                    } else {
+                        var w = button.w;
+                        const h = button.h;
+                        var x = button.x;
+                        var y = button.dy;
+                        var r = 10;
+                        ctx.fillStyle = color;
+                        if (button.hit) {
+                            if (button.hit.active) {
+                                ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
+                            }
+                        }
+                        ctx.roundRect(x, y, w, h, r).fill();
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = bit.button;
+                        ctx.fillText(button.name, x + w / 2, y + (h * 2));
+                    }
 
-					if(button.key && hint)
-					{
-						ctx.fillStyle = "rgba(0,0,0,0.25)";
-						ctx.textAlign = "center";
-						ctx.textBaseline = "middle";
-						ctx.font = bit.button;
-						if(button.name == "start" || button.name == "select")
-						{
-							x += w/2
-						}
-						ctx.fillText(button.key, x, y-(r*1.5));
-					}
-				}
-			},
-            state(id, n, type)
-			{
-				if(touches[id].id != "stick")
-				{
-					var touch = {
-						x:touches[id].x,
-						y:touches[id].y
-					};
-					var button = 	buttons_layout[n];
-					var name = button.name;
+                    if (button.key && hint) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = bit.button;
+                        if (button.name == 'start' || button.name == 'select') {
+                            x += w / 2;
+                        }
+                        ctx.fillText(button.key, x, y - (r * 1.5));
+                    }
+                }
+            },
+            state(id, n, type) {
+                if (touches[id].id != 'stick') {
+                    const touch = {
+                        x: touches[id].x,
+                        y: touches[id].y
+                    };
+                    const button = 	buttons_layout[n];
+                    const name = button.name;
 
-					var dx = parseInt(touch.x - button.dx);
- 					var dy = parseInt(touch.y - button.dy);
- 					var dist = width;
- 					if(button.r)
- 					{
- 						dist = parseInt(Math.sqrt(dx*dx + dy*dy));
+                    const dx = parseInt(touch.x - button.dx);
+ 					const dy = parseInt(touch.y - button.dy);
+ 					let dist = width;
+ 					if (button.r) {
+ 						dist = parseInt(Math.sqrt(dx * dx + dy * dy));
+ 					} else if (touch.x > button.hit.x[0] && touch.x < button.hit.x[1] && touch.y > button.hit.y[0] && touch.y < button.hit.y[1]) {
+                        dist = 0;
+                    }
+ 					if (dist < radius && touches[id].id != 'stick') {
+                        if (!type) {
+                            touches[id].id = name;
+                        } else {
+                            switch (type) {
+                                case 'mousedown':
+                                    touches[id].id = name;
+                                    break;
+                                case 'mouseup':
+                                    delete touches[id].id;
+                                    controller.buttons.reset(n);
+                                    break;
+                            }
+                        }
  					}
- 					else
- 					{
-						if(touch.x > button.hit.x[0] && touch.x < button.hit.x[1] && touch.y > button.hit.y[0] && touch.y < button.hit.y[1])
-						{
-							dist = 0;
-						}
- 					}
- 					if(dist < radius && touches[id].id != "stick")
- 					{
-						if(!type)
-						{
-							touches[id].id = name;
-						}
-						else
-						{
-							switch(type)
-							{
-								case "mousedown":
-									touches[id].id = name;
-								break;
-								case "mouseup":
-									delete touches[id].id;
-									controller.buttons.reset(n);
-								break;
-							}
-						}
- 					}
-					if(touches[id].id == name)
- 					{
+                    if (touches[id].id == name) {
  						map[name] = 1;
  						button.hit.active = true;
- 						if(dist > radius)
- 						{
+ 						if (dist > radius) {
  							button.hit.active = false;
  							map[name] = 0;
- 							delete touches[id].id	;
+ 							delete touches[id].id;
  						}
  					}
-				}
-			},
-            reset(n)
-			{
-				var button = 	buttons_layout[n];
-				var name = button.name;
-				button.hit.active = false;
-				map[name] = 0;
-			}
+                }
+            },
+            reset(n) {
+                const button = 	buttons_layout[n];
+                const name = button.name;
+                button.hit.active = false;
+                map[name] = 0;
+            }
         },
         stick: {
             radius: 40,
@@ -559,98 +503,87 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
             y: 0,
             dx: 0,
             dy: 0,
-            init()
-			{
-				this.radius = 40;
-				this.x = (width) - (layout.x);
-				this.y = layout.y;
-				this.dx = this.x;
-				this.dy = this.y;
-				map["x-dir"] = 0;
-				map["y-dir"] = 0;
-				map["x-axis"] = 0;
-				map["y-axis"] = 0;
-			},
-            draw()
-			{
-				ctx.fillStyle = colors.joystick.base;
-				ctx.beginPath();
-				ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-				ctx.fill();
-				ctx.closePath();
+            init() {
+                this.radius = 40;
+                this.x = (width) - (layout.x);
+                this.y = layout.y;
+                this.dx = this.x;
+                this.dy = this.y;
+                map['x-dir'] = 0;
+                map['y-dir'] = 0;
+                map['x-axis'] = 0;
+                map['y-axis'] = 0;
+            },
+            draw() {
+                ctx.fillStyle = colors.joystick.base;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.closePath();
 
-				ctx.fillStyle = colors.joystick.dust;
-				ctx.beginPath();
-				ctx.arc(this.x, this.y, this.radius-5, 0, 2 * Math.PI, false);
-				ctx.fill();
-				ctx.closePath();
+                ctx.fillStyle = colors.joystick.dust;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.closePath();
 
-				ctx.fillStyle = colors.joystick.stick;
-				ctx.beginPath();
-				ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
-				ctx.fill();
-				ctx.closePath();
+                ctx.fillStyle = colors.joystick.stick;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.closePath();
 
-				ctx.fillStyle = colors.joystick.ball;
-				ctx.beginPath();
-				ctx.arc(this.dx, this.dy, this.radius-10, 0, 2 * Math.PI, false);
-				ctx.fill();
-				ctx.closePath();
-			},
-            state(id, type)
-			{
-				var touch = {
-					x:touches[id].x,
-					y:touches[id].y
-				};
-				var dx = parseInt(touch.x - this.x);
-				var dy = parseInt(touch.y - this.y);
-				var dist = (parseInt(Math.sqrt(dx*dx + dy*dy)));
-				if(dist < (this.radius*1.5))
-				{
-					if(!type)
-					{
-						touches[id].id = "stick";
-					}
-					else
-					{
-						switch(type)
-						{
-							case "mousedown":
-								touches[id].id = "stick";
-							break;
-							case "mouseup":
-								delete touches[id].id;
-								controller.stick.reset();
-							break;
-						}
-					}
-				}
-				if(touches[id].id == "stick")
-				{
-					if(Math.abs(parseInt(dx)) < (this.radius/2)){this.dx = this.x + dx;}
-					if(Math.abs(parseInt(dy)) < (this.radius/2)){this.dy = this.y + dy;}
-					map["x-axis"] = (this.dx - this.x)/(this.radius/2);
-					map["y-axis"] = (this.dy - this.y)/(this.radius/2);
-					map["x-dir"] = Math.round(map["x-axis"]);
-					map["y-dir"] = Math.round(map["y-axis"]);
+                ctx.fillStyle = colors.joystick.ball;
+                ctx.beginPath();
+                ctx.arc(this.dx, this.dy, this.radius - 10, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.closePath();
+            },
+            state(id, type) {
+                const touch = {
+                    x: touches[id].x,
+                    y: touches[id].y
+                };
+                const dx = parseInt(touch.x - this.x);
+                const dy = parseInt(touch.y - this.y);
+                const dist = (parseInt(Math.sqrt(dx * dx + dy * dy)));
+                if (dist < (this.radius * 1.5)) {
+                    if (!type) {
+                        touches[id].id = 'stick';
+                    } else {
+                        switch (type) {
+                            case 'mousedown':
+                                touches[id].id = 'stick';
+                                break;
+                            case 'mouseup':
+                                delete touches[id].id;
+                                controller.stick.reset();
+                                break;
+                        }
+                    }
+                }
+                if (touches[id].id == 'stick') {
+                    if (Math.abs(parseInt(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
+                    if (Math.abs(parseInt(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
+                    map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
+                    map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
+                    map['x-dir'] = Math.round(map['x-axis']);
+                    map['y-dir'] = Math.round(map['y-axis']);
 
-					if(dist > (this.radius*1.5))
-					{
-						controller.stick.reset();
-						delete touches[id].id;
-					}
-				}
-			},
-            reset()
-			{
-				this.dx = this.x;
-				this.dy = this.y;
-				map["x-dir"] = 0;
-				map["y-dir"] = 0;
-				map["x-axis"] = 0;
-				map["y-axis"] = 0;
-			}
+                    if (dist > (this.radius * 1.5)) {
+                        controller.stick.reset();
+                        delete touches[id].id;
+                    }
+                }
+            },
+            reset() {
+                this.dx = this.x;
+                this.dy = this.y;
+                map['x-dir'] = 0;
+                map['y-dir'] = 0;
+                map['x-axis'] = 0;
+                map['y-axis'] = 0;
+            }
         }
     };
 
@@ -659,226 +592,184 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
 	**
 	*/
     var events = {
-        bind()
-		{
-			var ev = {
-				browser:["mousedown", "mouseup", "mousemove"],
-				app:["touchstart", "touchend", "touchmove"]
-			}
-			ev = (document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1) ?
-			ev.app :
-			ev.browser;
-			for(var e in ev)
-			{
-				canvas.addEventListener(ev[e], CanvasGamepad.events, false);
-			}
-		},
-        listen(e)
-		{
-			if(e.type)
-			{
-				var type = e.type;
-				if(e.type.indexOf("mouse") != -1)
-				{
-					e.identifier = "desktop";
-					e = {touches:[e]}
-				}
-				for(var n = 0; n < (e.touches.length > 5 ? 5 : e.touches.length); n++)
-				{
-					var id = e.touches[n].identifier;
-					if(!touches[id])
-					{
-						touches[id] = {
-							x:e.touches[n].pageX,
-							y:e.touches[n].pageY
-						}
-					}
-					else
-					{
-						touches[id].x = e.touches[n].pageX;
-						touches[id].y = e.touches[n].pageY;
-					}
-				}
+        bind() {
+            let ev = {
+                browser: ['mousedown', 'mouseup', 'mousemove'],
+                app: ['touchstart', 'touchend', 'touchmove']
+            };
+            ev = (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1) ?
+                ev.app :
+                ev.browser;
+            for (const e in ev) {
+                canvas.addEventListener(ev[e], CanvasGamepad.events, false);
+            }
+        },
+        listen(e) {
+            if (e.type) {
+                const type = e.type;
+                if (e.type.indexOf('mouse') != -1) {
+                    e.identifier = 'desktop';
+                    e = { touches: [e] };
+                }
+                for (var n = 0; n < (e.touches.length > 5 ? 5 : e.touches.length); n++) {
+                    var id = e.touches[n].identifier;
+                    if (!touches[id]) {
+                        touches[id] = {
+                            x: e.touches[n].pageX,
+                            y: e.touches[n].pageY
+                        };
+                    } else {
+                        touches[id].x = e.touches[n].pageX;
+                        touches[id].y = e.touches[n].pageY;
+                    }
+                }
 
-				/*
+                /*
 				**
 				*/
-				for(var id in touches)
-				{
-					switch(type)
-					{
-						case "touchstart":
-						case "touchmove":
-							controller.stick.state(id);
-							for(var n = 0; n < buttons_layout.length; n++)
-							{
-								controller.buttons.state(id, n);
-							}
-						break;
-						case "mousedown":
-						case "mousemove":
-						case "mouseup":
-							controller.stick.state(id, type);
-							for(var n = 0; n < buttons_layout.length; n++)
-							{
-								controller.buttons.state(id, n, type);
-							}
-						break;
-					}
-				}
+                for (var id in touches) {
+                    switch (type) {
+                        case 'touchstart':
+                        case 'touchmove':
+                            controller.stick.state(id);
+                            for (var n = 0; n < buttons_layout.length; n++) {
+                                controller.buttons.state(id, n);
+                            }
+                            break;
+                        case 'mousedown':
+                        case 'mousemove':
+                        case 'mouseup':
+                            controller.stick.state(id, type);
+                            for (var n = 0; n < buttons_layout.length; n++) {
+                                controller.buttons.state(id, n, type);
+                            }
+                            break;
+                    }
+                }
 
-				/*
+                /*
 				** @description remove touchend from touches
 				*/
-				if(e.type == "touchend")
-				{
-					var id = e.changedTouches[0].identifier;
-					if(touches[id].id == "stick"){controller.stick.reset();}
-					for(var n = 0; n < buttons_layout.length; n++)
-					{
-						if(touches[id].id == buttons_layout[n].name)
-						{
-							controller.buttons.reset(n);
-						}
-					}
-					if(touches[id]){delete touches[id];}
+                if (e.type == 'touchend') {
+                    var id = e.changedTouches[0].identifier;
+                    if (touches[id].id == 'stick') { controller.stick.reset(); }
+                    for (var n = 0; n < buttons_layout.length; n++) {
+                        if (touches[id].id == buttons_layout[n].name) {
+                            controller.buttons.reset(n);
+                        }
+                    }
+                    if (touches[id]) { delete touches[id]; }
 
-					if(e.changedTouches.length > e.touches.length)
-					{
-						var length = 0;
-						var delta = e.changedTouches.length - e.touches.length;
-						for(var id in touches)
-						{
-							if(length >= delta){delete touches[id];};
-							length++;
-						}
-					}
-					if(e.touches.length == 0)
-					{
-						touches = {};
-						for(var n = 0; n < buttons_layout.length; n++)
-						{
-							controller.buttons.reset(n);
-						}
-						controller.stick.reset();
-					}
-				}
-			}
-			else
-			{
-	      var keys = e;
-	      var dir = 0;
-				for(var prop in keys)
-				{
-	        switch(prop)
-	        {
-	          case "%"://left
-	            if(keys[prop]){dir+=1;}
+                    if (e.changedTouches.length > e.touches.length) {
+                        let length = 0;
+                        const delta = e.changedTouches.length - e.touches.length;
+                        for (var id in touches) {
+                            if (length >= delta) { delete touches[id]; }
+                            length++;
+                        }
+                    }
+                    if (e.touches.length == 0) {
+                        touches = {};
+                        for (var n = 0; n < buttons_layout.length; n++) {
+                            controller.buttons.reset(n);
+                        }
+                        controller.stick.reset();
+                    }
+                }
+            } else {
+	      const keys = e;
+	      let dir = 0;
+                for (const prop in keys) {
+	        switch (prop) {
+	          case '%':// left
+	            if (keys[prop]) { dir += 1; }
 	          break;
-	          case "&"://up
-	            if(keys[prop]){dir+=2;}
+	          case '&':// up
+	            if (keys[prop]) { dir += 2; }
 	          break;
-	          case "'"://right
-	            if(keys[prop]){dir+=4;}
+	          case "'":// right
+	            if (keys[prop]) { dir += 4; }
 	          break;
-	          case "("://down
-	            if(keys[prop]){dir+=8;}
+	          case '(':// down
+	            if (keys[prop]) { dir += 8; }
 	          break;
 	          default:
-	            if(keys[prop])
-              {
-                for(var n = 0; n < buttons_layout.length; n++)
-                {
-                	if(buttons_layout[n].key)
-                	{
-                		if(buttons_layout[n].key == prop)
-                		{
-											touches[buttons_layout[n].name] = {id:buttons_layout[n].name, x:buttons_layout[n]["hit"].x[0] + buttons_layout[n].w/2 , y:buttons_layout[n]["hit"].y[0] + buttons_layout[n].h/2};
-                			controller.buttons.state(buttons_layout[n].name, n, "mousedown")
+	            if (keys[prop]) {
+                                for (var n = 0; n < buttons_layout.length; n++) {
+                	if (buttons_layout[n].key) {
+                		if (buttons_layout[n].key == prop) {
+                                            touches[buttons_layout[n].name] = { id: buttons_layout[n].name, x: buttons_layout[n].hit.x[0] + buttons_layout[n].w / 2, y: buttons_layout[n].hit.y[0] + buttons_layout[n].h / 2 };
+                			controller.buttons.state(buttons_layout[n].name, n, 'mousedown');
                 		}
                 	}
-                }
-              }
-              else
-              {
-              	if(!keys[prop])
-              	{
-              		for(var n = 0; n < buttons_layout.length; n++)
-              		{
-										if(buttons_layout[n].key)
-	                	{
-	                		if(buttons_layout[n].key == prop)
-	                		{
-	                			controller.buttons.reset(n)
+                                }
+                            } else if (!keys[prop]) {
+              		for (var n = 0; n < buttons_layout.length; n++) {
+                                    if (buttons_layout[n].key) {
+	                		if (buttons_layout[n].key == prop) {
+	                			controller.buttons.reset(n);
 	                			delete touches[buttons_layout[n].name];
 	                		}
 	                	}
               		}
               		delete keys[prop];
               	}
-              }
 	          break;
 	        }
-					controller.stick.dx = controller.stick.x;
+                    controller.stick.dx = controller.stick.x;
 	        controller.stick.dy = controller.stick.y;
-					switch(dir)
-	        {
-	          case 1://left
-	            controller.stick.dx = controller.stick.x-controller.stick.radius/2;
+                    switch (dir) {
+	          case 1:// left
+	            controller.stick.dx = controller.stick.x - controller.stick.radius / 2;
 	          break;
-	          case 2://up
-	            controller.stick.dy = controller.stick.y-controller.stick.radius/2;
+	          case 2:// up
+	            controller.stick.dy = controller.stick.y - controller.stick.radius / 2;
 	          break;
-	          case 3://left up
-	            controller.stick.dx = controller.stick.x-controller.stick.radius/2;
-	            controller.stick.dy = controller.stick.y-controller.stick.radius/2;
+	          case 3:// left up
+	            controller.stick.dx = controller.stick.x - controller.stick.radius / 2;
+	            controller.stick.dy = controller.stick.y - controller.stick.radius / 2;
 	          break;
-	          case 4://right
-	            controller.stick.dx = controller.stick.x+controller.stick.radius/2;
+	          case 4:// right
+	            controller.stick.dx = controller.stick.x + controller.stick.radius / 2;
 	          break;
-	          case 6://right up
-	            controller.stick.dx = controller.stick.x+controller.stick.radius/2;
-	            controller.stick.dy = controller.stick.y-controller.stick.radius/2;
+	          case 6:// right up
+	            controller.stick.dx = controller.stick.x + controller.stick.radius / 2;
+	            controller.stick.dy = controller.stick.y - controller.stick.radius / 2;
 	          break;
-	          case 8://down
-	            controller.stick.dy = controller.stick.y+controller.stick.radius/2;
+	          case 8:// down
+	            controller.stick.dy = controller.stick.y + controller.stick.radius / 2;
 	          break;
-	          case 9://left down
-	            controller.stick.dx = controller.stick.x-controller.stick.radius/2;
-	            controller.stick.dy = controller.stick.y+controller.stick.radius/2;
+	          case 9:// left down
+	            controller.stick.dx = controller.stick.x - controller.stick.radius / 2;
+	            controller.stick.dy = controller.stick.y + controller.stick.radius / 2;
 	          break;
-	          case 12://right down
-	            controller.stick.dx = controller.stick.x+controller.stick.radius/2;
-	            controller.stick.dy = controller.stick.y+controller.stick.radius/2;
+	          case 12:// right down
+	            controller.stick.dx = controller.stick.x + controller.stick.radius / 2;
+	            controller.stick.dy = controller.stick.y + controller.stick.radius / 2;
 	          break;
 	          default:
 	            controller.stick.dx = controller.stick.x;
 	            controller.stick.dy = controller.stick.y;
 	          break;
 	        }
-	        if(dir != 0)
-	        {
-						touches["stick"] = {id:"stick"};
-		        controller.stick.state("stick", "mousemove");
-	        }
-	        else
-	        {
+	        if (dir != 0) {
+                        touches.stick = { id: 'stick' };
+		        controller.stick.state('stick', 'mousemove');
+	        } else {
 	        	controller.stick.reset();
-						delete touches["stick"];
+                        delete touches.stick;
 	        }
-				}
-			}
+                }
+            }
 
-			return events.broadcast();
-		},
-        broadcast()
-		{
-			return map;
-		},
-        observe()
-		{
-			return events.broadcast();
-		}
+            return events.broadcast();
+        },
+        broadcast() {
+            return map;
+        },
+        observe() {
+            return events.broadcast();
+        }
     };
 
     /*
@@ -896,52 +787,48 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
 	** @description display debug and trace info
 	*/
     var helper = {
-        debug()
-		{
-			var dy = 15;
-			ctx.fillStyle = "rgba(0,0,0,0.5)";
-			ctx.textAlign = "left";
-			ctx.textBaseline = "middle";
-			ctx.font = bit.medium;
-			ctx.fillText("debug", 10, dy);
-			ctx.font = bit.small;
-			dy += 5;
-			for(var prop in touches)
-			{
-				dy += 10;
-				var text = prop + " : " + JSON.stringify(touches[prop]).slice(1,-1);
-				ctx.fillText(text, 10, dy);
-			}
-		},
-        trace()
-		{
-			var dy = 15;
-			ctx.fillStyle = "rgba(0,0,0,0.5)";
-			ctx.textAlign = "right";
-			ctx.textBaseline = "middle";
-			ctx.font = bit.medium;
-			ctx.fillText("trace", width-10, dy);
-			ctx.font = bit.small;
-			dy += 5;
-			for(var prop in map)
-			{
-				dy += 10;
-				var text = prop + " : " + map[prop];
+        debug() {
+            let dy = 15;
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.font = bit.medium;
+            ctx.fillText('debug', 10, dy);
+            ctx.font = bit.small;
+            dy += 5;
+            for (const prop in touches) {
+                dy += 10;
+                const text = `${prop} : ${JSON.stringify(touches[prop]).slice(1, -1)}`;
+                ctx.fillText(text, 10, dy);
+            }
+        },
+        trace() {
+            let dy = 15;
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.font = bit.medium;
+            ctx.fillText('trace', width - 10, dy);
+            ctx.font = bit.small;
+            dy += 5;
+            for (const prop in map) {
+                dy += 10;
+                const text = `${prop} : ${map[prop]}`;
 
-				ctx.fillText(text, width-10, dy);
-			}
-		}
+                ctx.fillText(text, width - 10, dy);
+            }
+        }
     };
 
     /*
 	**
 	*/
     function css() {
-        let style = document.createElement('style');
-        style.innerHTML = ''
+        const style = document.createElement('style');
+        style.innerHTML = `${''
 		+ '\n@font-face {'
 		+ "\n\t\tfont-family: 'bit';"
-    + '\n\t\tsrc: url(' + bit + ") format('truetype');"
+    + '\n\t\tsrc: url('}${bit}) format('truetype');`
     + '\n\t\tfont-weight: normal;'
     + '\n\t\tfont-style: normal;'
 		+ '}'
@@ -995,12 +882,12 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
         };
     }
 
-  /*
+    /*
   ** @method loop {method}
   ** @description this is the
   */
 
-  (function loop() {
+    (function loop() {
         toggle = !toggle;
         if (toggle) {
             requestAnimationFrame(loop);
@@ -1024,10 +911,10 @@ x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
     };
 
     return {
-  	setup(config){setup(config);},
-        draw(){draw();},
-        events(e){return events.listen(e);},
-        observe(){return events.observe();}
+  	setup(config) { setup(config); },
+        draw() { draw(); },
+        events(e) { return events.listen(e); },
+        observe() { return events.observe(); }
     };
 }());
 
