@@ -46,6 +46,21 @@
   ],
   "author": "eugene andruszczenko <eugene.andruszczenko@gmail.com> (http://32teeth.org)",
   "license": "Apache 2.0",
+  "scripts": {
+    "start": "webpack-dev-server --host 0.0.0.0 --hot ./webpack.config.js",
+    "build": "webpack ./webpack.config.js",
+    "lint": "eslint ./src ./test"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "./src/**/*.js": [
+      "eslint"
+    ]
+  },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
