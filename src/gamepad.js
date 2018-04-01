@@ -1,296 +1,302 @@
 import font from './font';
-var bit = font;
 
-var CanvasGamepad = (function(){
-	/*
-	** @param canvas {object}
-	*/
-	var canvas;
+let bit = font;
 
-	/*
-	** @param ctx {context}
-	*/
-	var ctx;
+var CanvasGamepad = (function () {
+    let canvas = null;
+    let ctx;
 
-	/*
+    /*
 	** @param px {int}
 	** @param py {int}
 	*/
-	var px = 0;
-	var py = 0;
+    let px = 0;
+    let py = 0;
 
-	var width = window.innerWidth;
-	var height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-	/*
+    /*
 	** @param scale {array}
 	*/
-	var scale = [
-		(window.innerWidth/width),
-		(window.innerHeight/height)
-	];
+    let scale = [
+        (window.innerWidth / width),
+        (window.innerHeight / height)
+    ];
 
-	/*
+    /*
 	**
 	*/
 
-	/*
+    /*
 	** @param bit {object}
 	** @description 8 bit font used in application
 	*/
-	var font = {}
+    let font = {};
 
 
-	/*
+    /*
 	**
 	*/
-	var touches = {};
-	var map = {};
+    let touches = {};
+    let map = {};
 
-  /*
+    /*
   ** @param toggle {boolean}
   */
-  var toggle = false;
+    let toggle = false;
 
-  /*
+    /*
   ** @param ready {boolean}
   */
-  var ready = false;
+    let ready = false;
 
-  /*
+    /*
   ** @param hint {boolean}
   */
-  var hint = false;
+    let hint = false;
 
-	/*
+    /*
 	** @param debug {boolean}
 	*/
-	var debug = false;
-	/*
+    let debug = false;
+    /*
 	** @param debug {boolean}
 	*/
-	var trace = false;
+    let trace = false;
 
-	/*
+    /*
 	** @param hidden {boolean}
 	*/
-	var hidden = false;
+    let hidden = false;
 
-	/*
+    /*
 	** @param position {string}
 	** @description
 	** TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT | BOTTOM_RIGHT
 	*/
-	var layout = "BOTTOM_RIGHT";
+    let layout = 'BOTTOM_RIGHT';
 
 
-
-	/*
+    /*
 	** @param radius {int}
 	*/
-	var radius = 25;
+    let radius = 25;
 
-	/*
+    /*
 	** @param opacity {float} (0.0 -> 1.0)
 	** @description opacity
 	*/
-	var opacity = 0.4;
+    let opacity = 0.4;
 
-	/*
+    /*
 	** @param colors {object}
 	** @description color collection used in app in rgba format
 	*/
-	var colors = {
-		red:"rgba(255,0,0," + opacity +")",
-		green:"rgba(0,255,0," + opacity +")",
-		blue:"rgba(0,0,255," + opacity +")",
-		purple:"rgba(255,0,255," + opacity +")",
-		yellow:"rgba(255,255,0," + opacity +")",
-		cyan:"rgba(0,255,255," + opacity +")",
-		black:"rgba(0,0,0," + opacity +")",
-		white:"rgba(255,255,255," + opacity +")",
-		joystick:{
-			base:"rgba(0,0,0," + opacity +")",
-			dust:"rgba(0,0,0," + opacity +")",
-			stick:"rgba(204,204,204,1)",
-			ball:"rgba(255,255,255,1)"
-		}
-	}
+    let colors = {
+        red: 'rgba(255,0,0,' + opacity + ')',
+        green: 'rgba(0,255,0,' + opacity + ')',
+        blue: 'rgba(0,0,255,' + opacity + ')',
+        purple: 'rgba(255,0,255,' + opacity + ')',
+        yellow: 'rgba(255,255,0,' + opacity + ')',
+        cyan: 'rgba(0,255,255,' + opacity + ')',
+        black: 'rgba(0,0,0,' + opacity + ')',
+        white: 'rgba(255,255,255,' + opacity + ')',
+        joystick: {
+            base: 'rgba(0,0,0,' + opacity + ')',
+            dust: 'rgba(0,0,0,' + opacity + ')',
+            stick: 'rgba(204,204,204,1)',
+            ball: 'rgba(255,255,255,1)'
+        }
+    };
 
-	/*
+    /*
 	** @param buttons {int}
 	*/
-	var buttons = 0;
+    let buttons = 0;
 
-	/*
+    /*
 	** @param buttons_layout {array}
 	*/
-	var buttons_layout = [
-		[
-			{x:0,y:0,r:radius,color:colors.red,name:"a"}
-		],
-		[
-			{x:-(radius/4),y:radius+(radius/2),r:radius,color:colors.red,name:"a"},
-			{x:(radius+(radius/0.75)),y:-radius+(radius/2),r:radius,color:colors.green,name:"b"}
-		],
-		[
-			{x:-radius*0.75,y:radius*2,r:radius,color:colors.red,name:"a"},
-			{x:radius*1.75,y:radius,r:radius,color:colors.green,name:"b"},
-			{x:radius*3.5,y:-radius,r:radius,color:colors.blue,name:"c"}
-		],
-		[
-			{x:-radius,y:radius,r:radius,color:colors.red,name:"a"},
-			{x:radius*2-radius,y:-(radius+(radius))+radius,r:radius,color:colors.green,name:"b"},
-			{x:radius*2-radius,y:(radius+radius)+radius,r:radius,color:colors.blue,name:"x"},
-			{x:radius*3,y:0+radius,r:radius,color:colors.purple,name:"y"}
-		]
-	];
-	/*
+    let buttons_layout = [
+        [
+            {
+x: 0, y: 0, r: radius, color: colors.red, name: 'a'
+}
+        ],
+        [
+            {
+ x: -(radius / 4), y: radius + (radius / 2), r: radius, color: colors.red, name: 'a'
+},
+            {
+x: (radius + (radius / 0.75)), y: -radius + (radius / 2), r: radius, color: colors.green, name: 'b'
+ }
+        ],
+        [
+            {
+ x: -radius * 0.75, y: radius * 2, r: radius, color: colors.red, name: 'a'
+ },
+            {
+ x: radius * 1.75, y: radius, r: radius, color: colors.green, name: 'b'
+},
+            {
+x: radius * 3.5, y: -radius, r: radius, color: colors.blue, name: 'c'
+ }
+        ],
+        [
+            {
+x: -radius, y: radius, r: radius, color: colors.red, name: 'a'
+ },
+            {
+x: radius * 2 - radius, y: -(radius + (radius)) + radius, r: radius, color: colors.green, name: 'b'
+},
+            {
+x: radius * 2 - radius, y: (radius + radius) + radius, r: radius, color: colors.blue, name: 'x'
+ },
+            {
+x: radius * 3, y: 0 + radius, r: radius, color: colors.purple, name: 'y'
+ }
+        ]
+    ];
+    /*
 	** @param button_offset {object}
 	*/
-	var button_offset = {x:(radius*3),y:(radius*3)};
-	/*
+    let button_offset = { x: (radius * 3), y: (radius * 3) };
+    /*
 	** @param buttons_layout_built {boolean}
 	*/
-	var buttons_layout_built = false;
+    let buttons_layout_built = false;
 
-	/*
+    /*
 	** @param start {boolean}
 	*/
-	var start = true;
-	var start_button = {x:width/2,y:-15,w:50,h:15,color:colors.black,name:"start"};
+    let start = true;
+    let start_button = {
+ x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'start'
+};
 
-	/*
+    /*
 	** @param start {boolean}
 	*/
-	var select = false;
-	var select_button = {x:width/2,y:-15,w:50,h:15,color:colors.black,name:"select"};
+    let select = false;
+    let select_button = {
+ x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'select'
+};
 
-	/*
+    /*
 	** @param hidden {boolean}
 	*/
-	var joystick = true;
+    let joystick = true;
 
  	/*
 	** @method setup
 	** @description
 	*/
-	function setup(config)
-	{
-		document.addEventListener('touchmove', function(e) { e.preventDefault(); }, false);
-		css();
-		var length = 0;
-		for(var prop in config){if(config.hasOwnProperty(prop)){length++;}}
-		if(length > 0)
-		{
-			config.canvas ? stage.assign(config.canvas) : stage.create();
-			for(var prop in config)
-			{
-				switch(prop)
-				{
-					case "debug":
-					case "trace":
-					case "layout":
-					case "start":
-					case "select":
-					case "hidden":
-					case "joystick":
-					case "hint":
-						switch(typeof config[prop])
-						{
-							case "string":
-								eval(prop + "='" + config[prop] + "'");
-							break;
-							case "boolean":
-							case "number":
-								eval(prop + "=" + config[prop]);
-							break;
-							case "object":
-								switch(prop)
-								{
-									case "start":
-									case "select":
-										eval(prop + "=" + true);
-										eval(prop + "_button.key=\"" + config[prop].key + "\"");
-									break;
-								}
-							break;
-						}
-					break;
-					case "buttons":
-						buttons = config[prop].length - 1;
-						if(config[prop].length > buttons_layout.length){buttons = buttons_layout.length-1}
-						buttons_layout = buttons_layout[buttons];
-						for(var n = 0; n < buttons + 1; n++)
-						{
-							var button = config[prop][n];
-							if(button.name){buttons_layout[n].name = button.name;};
-							if(button.color){buttons_layout[n].color = button.color;};
-							if(button.key){buttons_layout[n].key = button.key;};
+    function setup(config) {
+        document.addEventListener('touchmove', (e) => { e.preventDefault(); }, false);
+        css();
+        let length = 0;
+        for (var prop in config) { if (config.hasOwnProperty(prop)) { length++; } }
+        if (length > 0) {
+            config.canvas ? stage.assign(config.canvas) : stage.create();
+            for (var prop in config) {
+                switch (prop) {
+                    case 'debug':
+                    case 'trace':
+                    case 'layout':
+                    case 'start':
+                    case 'select':
+                    case 'hidden':
+                    case 'joystick':
+                    case 'hint':
+                        switch (typeof config[prop]) {
+                            case 'string':
+                                eval(`${prop  }='${  config[prop]  }'`);
+                                break;
+                            case 'boolean':
+                            case 'number':
+                                eval(`${prop  }=${  config[prop]}`);
+                                break;
+                            case 'object':
+                                switch (prop) {
+                                    case 'start':
+                                    case 'select':
+                                        eval(`${prop  }=${  true}`);
+                                        eval(`${prop  }_button.key="${  config[prop].key  }"`);
+                                        break;
+                                }
+                                break;
+                        }
+                        break;
+                    case 'buttons':
+                        buttons = config[prop].length - 1;
+                        if (config[prop].length > buttons_layout.length) { buttons = buttons_layout.length - 1 ;}
+                        buttons_layout = buttons_layout[buttons];
+                        for (let n = 0; n < buttons + 1; n++) {
+                            let button = config[prop][n];
+                            if (button.name) { buttons_layout[n].name = button.name; }
+							if (button.color) { buttons_layout[n].color = button.color; }
+							if (button.key) { buttons_layout[n].key = button.key; }
 							buttons_layout_built = true;
-						}
-					break;
-				}
-			}
-		}
-		/*
+                        }
+                        break;
+                }
+            }
+        }
+        /*
 		** @description default setting
 		*/
-		else
-		{
-			stage.create();
-		}
-		if(!buttons_layout_built){buttons_layout = buttons_layout[buttons];};
+        else {
+            stage.create();
+        }
+        if (!buttons_layout_built) { buttons_layout = buttons_layout[buttons]; }
 
-		if(start){buttons_layout.push(start_button)};
-		if(select){buttons_layout.push(select_button)};
+		if (start) { buttons_layout.push(start_button); }
+		if (select) { buttons_layout.push(select_button); }
 
 		events.bind();
-		controller.init();
-		init();
-	}
+        controller.init();
+        init();
+    }
 
  	/*
 	** @method setup
 	** @description
 	*/
-	function init()
-	{
-		/*
+    function init() {
+        /*
 		** show loading
 		*/
-		ctx.fillStyle = "rgba(0,0,0,0.5)";
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.font = bit.small;
-		ctx.fillText("loading", width/2, height/2);
-		if(joystick){controller.stick.draw();}
-		controller.buttons.draw();
-		setTimeout(function(){ready = true;},250);
-	};
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = bit.small;
+        ctx.fillText('loading', width / 2, height / 2);
+        if (joystick) { controller.stick.draw(); }
+        controller.buttons.draw();
+        setTimeout(() => {ready = true;}, 250);
+    }
 
  	/*
 	** @method setup
 	** @description
 	*/
-	function draw()
-	{
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		if(!hidden)
-		{
-			if(debug){helper.debug();};
-			if(trace){helper.trace();};
-			if(joystick){controller.stick.draw();}
-			controller.buttons.draw();
-		}
-	};
+	function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!hidden) {
+            if (debug) { helper.debug(); }
+			if (trace) { helper.trace(); }
+			if (joystick) { controller.stick.draw(); }
+            controller.buttons.draw();
+        }
+    }
 
 	/*
 	** @property stage {object}
 	** @description used to create and assign canvas object
 	*/
 	var stage = {
-		create:function(id)
+        create(id)
 		{
 			var id = id || "CanvasGamepad";
 			canvas = document.createElement('canvas');
@@ -298,27 +304,27 @@ var CanvasGamepad = (function(){
 			document.body.appendChild(canvas);
 			stage.assign(id)
 		},
-		assign:function(id)
+        assign(id)
 		{
 			if(!document.getElementById(id)){stage.create(id);}
 			canvas = document.getElementById(id);
 			stage.adjust();
 		},
-		adjust:function()
+        adjust()
 		{
 			ctx = canvas.getContext('2d');
 			ctx.canvas.width = width*scale[0];
 			ctx.canvas.height = height*scale[1];
 			ctx.scale(scale[0], scale[1]);
 		}
-	};
+    };
 
-	/*
+    /*
 	** @property controller {object}
 	** @description used to draw the controller
 	*/
-	var controller = {
-		init:function()
+    var controller = {
+        init()
 		{
 			var layout_string = layout;
 			layout = {x:0,y:0};
@@ -362,8 +368,8 @@ var CanvasGamepad = (function(){
 			controller.buttons.init();
 			if(joystick){controller.stick.init();}
 		},
-		buttons:{
-			init:function()
+        buttons: {
+            init()
 			{
 				for(var n = 0; n < buttons_layout.length; n++)
 				{
@@ -397,7 +403,7 @@ var CanvasGamepad = (function(){
 					map[button.name] = 0;
 				}
 			},
-			draw:function()
+            draw()
 			{
 				for(var n = 0; n < buttons_layout.length; n++)
 				{
@@ -481,7 +487,7 @@ var CanvasGamepad = (function(){
 					}
 				}
 			},
-			state:function(id, n, type)
+            state(id, n, type)
 			{
 				if(touches[id].id != "stick")
 				{
@@ -539,21 +545,21 @@ var CanvasGamepad = (function(){
  					}
 				}
 			},
-			reset:function(n)
+            reset(n)
 			{
 				var button = 	buttons_layout[n];
 				var name = button.name;
 				button.hit.active = false;
 				map[name] = 0;
 			}
-		},
-		stick:{
-			radius:40,
-			x:0,
-			y:0,
-			dx:0,
-			dy:0,
-			init:function()
+        },
+        stick: {
+            radius: 40,
+            x: 0,
+            y: 0,
+            dx: 0,
+            dy: 0,
+            init()
 			{
 				this.radius = 40;
 				this.x = (width) - (layout.x);
@@ -565,7 +571,7 @@ var CanvasGamepad = (function(){
 				map["x-axis"] = 0;
 				map["y-axis"] = 0;
 			},
-			draw:function()
+            draw()
 			{
 				ctx.fillStyle = colors.joystick.base;
 				ctx.beginPath();
@@ -591,7 +597,7 @@ var CanvasGamepad = (function(){
 				ctx.fill();
 				ctx.closePath();
 			},
-			state:function(id, type)
+            state(id, type)
 			{
 				var touch = {
 					x:touches[id].x,
@@ -636,7 +642,7 @@ var CanvasGamepad = (function(){
 					}
 				}
 			},
-			reset:function()
+            reset()
 			{
 				this.dx = this.x;
 				this.dy = this.y;
@@ -645,15 +651,15 @@ var CanvasGamepad = (function(){
 				map["x-axis"] = 0;
 				map["y-axis"] = 0;
 			}
-		}
-	}
+        }
+    };
 
 
-	/*
+    /*
 	**
 	*/
-	var events = {
-		bind:function()
+    var events = {
+        bind()
 		{
 			var ev = {
 				browser:["mousedown", "mouseup", "mousemove"],
@@ -667,7 +673,7 @@ var CanvasGamepad = (function(){
 				canvas.addEventListener(ev[e], CanvasGamepad.events, false);
 			}
 		},
-		listen:function(e)
+        listen(e)
 		{
 			if(e.type)
 			{
@@ -865,33 +871,32 @@ var CanvasGamepad = (function(){
 
 			return events.broadcast();
 		},
-		broadcast:function()
+        broadcast()
 		{
 			return map;
 		},
-		observe:function()
+        observe()
 		{
 			return events.broadcast();
 		}
-	};
+    };
 
-	/*
+    /*
 	** @property invert {method}
 	** @param color {string}
 	** @description invert color
 	*/
-	function invert(color)
-	{
+    function invert(color) {
 
-	}
+    }
 
 
-	/*
+    /*
 	** @property helper {object}
 	** @description display debug and trace info
 	*/
-	var helper = {
-		debug:function()
+    var helper = {
+        debug()
 		{
 			var dy = 15;
 			ctx.fillStyle = "rgba(0,0,0,0.5)";
@@ -908,7 +913,7 @@ var CanvasGamepad = (function(){
 				ctx.fillText(text, 10, dy);
 			}
 		},
-		trace:function()
+        trace()
 		{
 			var dy = 15;
 			ctx.fillStyle = "rgba(0,0,0,0.5)";
@@ -926,106 +931,104 @@ var CanvasGamepad = (function(){
 				ctx.fillText(text, width-10, dy);
 			}
 		}
-	};
+    };
 
-	/*
+    /*
 	**
 	*/
-	function css()
-	{
-		var style = document.createElement('style');
-		style.innerHTML = ""
-		+ "\n@font-face {"
+    function css() {
+        let style = document.createElement('style');
+        style.innerHTML = ''
+		+ '\n@font-face {'
 		+ "\n\t\tfont-family: 'bit';"
-    + "\n\t\tsrc: url(" + bit + ") format('truetype');"
-    + "\n\t\tfont-weight: normal;"
-    + "\n\t\tfont-style: normal;"
-		+ "}"
-		+ "\n"
-    + "* {"
-    + "\n\t\tpadding: 0;"
-    + "\n\t\tmargin: 0;"
-    + "\n\t\t-webkit-touch-callout: none;"
-    + "\n\t\t-webkit-user-select: none;"
-    + "}"
-    + "\n"
-    + "html"
-    + "{"
-    + "\n\t\t-ms-touch-action: manipulation;"
-    + "\n\t\ttouch-action: manipulation;"
-    + "\n}"
-    + "\n\n"
-    + "body"
-    + "{"
-    + "\n\t\twidth:  100%;"
-    + "\n\t\theight: 100%;"
-    + "\n\t\tmargin: 0px;  "
-    + "\n\t\tpadding:0px; "
-    + "\n\t\ttouch-action: none;"
-    + "\n\t\t-ms-touch-action: none;"
-    + "\n\t\toverflow: hidden;"
-    + "\n}"
-    + "\n"
-    + "canvas"
-    + "{"
-    + "\n\t\timage-rendering: optimizeSpeed;"
-    + "\n\t\timage-rendering: -moz-crisp-edges;"
-    + "\n\t\timage-rendering: -webkit-optimize-contrast;"
-    + "\n\t\timage-rendering: -o-crisp-edges;"
-    + "\n\t\timage-rendering: crisp-edges;"
-    + "\n\t\t-ms-interpolation-mode: nearest-neighbor;"
-    + "\n\t\t touch-action-delay: none;"
-    + "\n\t\ttouch-action: none;"
-    + "\n\t\t-ms-touch-action: none;"
-    + "\n\t\tposition:fixed;"
-    + "\n}"
-    + "\n";
-		document.head.appendChild(style);
+    + '\n\t\tsrc: url(' + bit + ") format('truetype');"
+    + '\n\t\tfont-weight: normal;'
+    + '\n\t\tfont-style: normal;'
+		+ '}'
+		+ '\n'
+    + '* {'
+    + '\n\t\tpadding: 0;'
+    + '\n\t\tmargin: 0;'
+    + '\n\t\t-webkit-touch-callout: none;'
+    + '\n\t\t-webkit-user-select: none;'
+    + '}'
+    + '\n'
+    + 'html'
+    + '{'
+    + '\n\t\t-ms-touch-action: manipulation;'
+    + '\n\t\ttouch-action: manipulation;'
+    + '\n}'
+    + '\n\n'
+    + 'body'
+    + '{'
+    + '\n\t\twidth:  100%;'
+    + '\n\t\theight: 100%;'
+    + '\n\t\tmargin: 0px;  '
+    + '\n\t\tpadding:0px; '
+    + '\n\t\ttouch-action: none;'
+    + '\n\t\t-ms-touch-action: none;'
+    + '\n\t\toverflow: hidden;'
+    + '\n}'
+    + '\n'
+    + 'canvas'
+    + '{'
+    + '\n\t\timage-rendering: optimizeSpeed;'
+    + '\n\t\timage-rendering: -moz-crisp-edges;'
+    + '\n\t\timage-rendering: -webkit-optimize-contrast;'
+    + '\n\t\timage-rendering: -o-crisp-edges;'
+    + '\n\t\timage-rendering: crisp-edges;'
+    + '\n\t\t-ms-interpolation-mode: nearest-neighbor;'
+    + '\n\t\t touch-action-delay: none;'
+    + '\n\t\ttouch-action: none;'
+    + '\n\t\t-ms-touch-action: none;'
+    + '\n\t\tposition:fixed;'
+    + '\n}'
+    + '\n';
+        document.head.appendChild(style);
 
-		bit = {
-			button:"18px 'bit'",
-			small:"12px 'bit'",
-			medium:"16px 'bit'",
-			large:"24px 'bit'",
-			huge:"48px 'bit'"
-		}
-	};
+        bit = {
+            button: "18px 'bit'",
+            small: "12px 'bit'",
+            medium: "16px 'bit'",
+            large: "24px 'bit'",
+            huge: "48px 'bit'"
+        };
+    }
 
   /*
   ** @method loop {method}
   ** @description this is the
   */
 
-  (function loop(){
-    toggle = toggle ? false : true;
-    if(toggle)
-    {
-      requestAnimationFrame(loop);
-      return;
-    }
-    if(ready){draw();}
-    requestAnimationFrame(loop);
-  })();
+  (function loop() {
+        toggle = !toggle;
+        if (toggle) {
+            requestAnimationFrame(loop);
+            return;
+        }
+        if (ready) { draw(); }
+        requestAnimationFrame(loop);
+    }());
 
-	CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
 	  if (w < 2 * r) r = w / 2;
 	  if (h < 2 * r) r = h / 2;
 	  this.beginPath();
-	  this.moveTo(x+r, y);
-	  this.arcTo(x+w, y,   x+w, y+h, r);
-	  this.arcTo(x+w, y+h, x,   y+h, r);
-	  this.arcTo(x,   y+h, x,   y,   r);
-	  this.arcTo(x,   y,   x+w, y,   r);
+	  this.moveTo(x + r, y);
+	  this.arcTo(x + w, y, x + w, y + h, r);
+	  this.arcTo(x + w, y + h, x, y + h, r);
+	  this.arcTo(x, y + h, x, y, r);
+	  this.arcTo(x, y, x + w, y, r);
 	  this.closePath();
 	  return this;
-	}
+    };
 
-  return {
-  	setup:function(config){setup(config);},
-		draw:function(){draw();},
-		events:function(e){return events.listen(e);},
-		observe:function(){return events.observe();}
-  };
-})();
+    return {
+  	setup(config){setup(config);},
+        draw(){draw();},
+        events(e){return events.listen(e);},
+        observe(){return events.observe();}
+    };
+}());
 
 export default CanvasGamepad;
