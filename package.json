@@ -23,8 +23,8 @@
     "type": "git",
     "url": "https://github.com/32teeth/html5-plugin-canvas-gamepad"
   },
-  "homepage":{
-    "url":"http://32teeth.github.io/html5-plugin-canvas-gamepad/"
+  "homepage": {
+    "url": "http://32teeth.github.io/html5-plugin-canvas-gamepad/"
   },
   "keywords": [
     "html5",
@@ -45,5 +45,19 @@
     "html5-browser"
   ],
   "author": "eugene andruszczenko <eugene.andruszczenko@gmail.com> (http://32teeth.org)",
-  "license": "Apache 2.0"
+  "license": "Apache 2.0",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-react": "^7.7.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.0.2",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
+  }
 }
