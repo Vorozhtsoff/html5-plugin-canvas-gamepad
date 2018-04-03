@@ -1,19 +1,17 @@
 /* eslint-disable no-use-before-define */
-import importedFont from './font';
 import { appendCss } from './css';
 
-let bit = importedFont;
-
-
-let canvas = null;
-let ctx;
+const bit = {
+    button: "18px 'bit'",
+    small: "12px 'bit'",
+    medium: "16px 'bit'",
+    large: "24px 'bit'",
+    huge: "48px 'bit'"
+};
 
 const width = window.innerWidth;
 const height = window.innerHeight;
 
-/*
-** @param scale {array}
-*/
 const scale = [
     (window.innerWidth / width),
     (window.innerHeight / height)
@@ -208,38 +206,33 @@ const selectButton = {
 const joystick = true;
 
 const stage = {
-    create(id = 'CanvasGamepad') {
-        canvas = document.createElement('canvas');
-        canvas.setAttribute('id', id);
-        document.body.appendChild(canvas);
-        stage.assign(id);
-    },
-    assign(id) {
-        if (!document.getElementById(id)) {
-            stage.create(id);
+    canvas: null,
+    ctx: null,
+    create(id) {
+        let element;
+        if (id) {
+            element = document.getElementById(id);
         }
-        canvas = document.getElementById(id);
-        stage.adjust();
+
+        if (!element) {
+            this.createCanvas(id);
+        }
+
+        this.adjust();
+    },
+    createCanvas(id = 'CanvasGamepad') {
+        this.canvas = document.createElement('canvas');
+        this.canvas.setAttribute('id', id);
+        document.body.appendChild(this.canvas);
     },
     adjust() {
-        ctx = canvas.getContext('2d');
-        ctx.canvas.width = width * scale[0];
-        ctx.canvas.height = height * scale[1];
-        ctx.scale(scale[0], scale[1]);
+        this.ctx = this.canvas.getContext('2d');
+        this.ctx.canvas.width = width * scale[0];
+        this.ctx.canvas.height = height * scale[1];
+        this.ctx.scale(scale[0], scale[1]);
     }
 };
 
-function css() {
-    appendCss();
-
-    bit = {
-        button: "18px 'bit'",
-        small: "12px 'bit'",
-        medium: "16px 'bit'",
-        large: "24px 'bit'",
-        huge: "48px 'bit'"
-    };
-}
 
 const controller = {
     init() {
@@ -336,60 +329,60 @@ const controller = {
                 if (r) {
                     if (button.hit) {
                         if (button.hit.active) {
-                            ctx.fillStyle = color;
-                            ctx.beginPath();
-                            ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
-                            ctx.fill();
-                            ctx.closePath();
+                            stage.ctx.fillStyle = color;
+                            stage.ctx.beginPath();
+                            stage.ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
+                            stage.ctx.fill();
+                            stage.ctx.closePath();
                         }
                     }
 
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-                    ctx.fill();
-                    ctx.closePath();
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                    stage.ctx.fillStyle = color;
+                    stage.ctx.beginPath();
+                    stage.ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+                    stage.ctx.fill();
+                    stage.ctx.closePath();
+                    stage.ctx.strokeStyle = color;
+                    stage.ctx.lineWidth = 2;
+                    stage.ctx.stroke();
 
-                    ctx.fillStyle = 'rgba(255,255,255,1)';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.font = bit.button;
-                    ctx.fillText(button.name, x, y);
+                    stage.ctx.fillStyle = 'rgba(255,255,255,1)';
+                    stage.ctx.textAlign = 'center';
+                    stage.ctx.textBaseline = 'middle';
+                    stage.ctx.font = bit.button;
+                    stage.ctx.fillText(button.name, x, y);
                 } else {
                     const { h } = button;
                     w = button.w; // eslint-disable-line prefer-destructuring
                     x = button.x; // eslint-disable-line prefer-destructuring
                     y = button.dy;
                     r = 10;
-                    ctx.fillStyle = color;
+                    stage.ctx.fillStyle = color;
                     if (button.hit) {
                         if (button.hit.active) {
-                            ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
+                            stage.ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
                         }
                     }
-                    ctx.roundRect(x, y, w, h, r).fill();
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.font = bit.button;
-                    ctx.fillText(button.name, x + (w / 2), y + (h * 2));
+                    stage.ctx.roundRect(x, y, w, h, r).fill();
+                    stage.ctx.strokeStyle = color;
+                    stage.ctx.lineWidth = 2;
+                    stage.ctx.stroke();
+                    stage.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    stage.ctx.textAlign = 'center';
+                    stage.ctx.textBaseline = 'middle';
+                    stage.ctx.font = bit.button;
+                    stage.ctx.fillText(button.name, x + (w / 2), y + (h * 2));
                 }
 
                 if (button.key && hint) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.font = bit.button;
+                    stage.ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                    stage.ctx.textAlign = 'center';
+                    stage.ctx.textBaseline = 'middle';
+                    stage.ctx.font = bit.button;
                     if (button.name === 'start' || button.name === 'select') {
                         x += w / 2;
                     }
-                    ctx.fillText(button.key, x, y - (r * 1.5));
+                    stage.ctx.fillText(button.key, x, y - (r * 1.5));
                 }
             }
         },
@@ -466,7 +459,7 @@ const controller = {
             map['x-axis'] = 0;
             map['y-axis'] = 0;
         },
-        draw() {
+        draw(ctx) {
             ctx.fillStyle = colors.joystick.base;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
@@ -540,34 +533,26 @@ const controller = {
     }
 };
 
-function init() {
+function init(ctx) {
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = bit.small;
     ctx.fillText('loading', width / 2, height / 2);
-    if (joystick) { controller.stick.draw(); }
+    if (joystick) { controller.stick.draw(stage.ctx); }
     controller.buttons.draw();
     setTimeout(() => { ready = true; }, 250);
 }
 
 function setup(config) {
     const { length } = Object.keys(config);
-    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, false);
-    css();
+    document.addEventListener('touchmove', e => e.preventDefault(), false);
+    appendCss();
 
     if (length) {
-        stage[config.canvas ? 'assign' : 'create'](config.canvas);
+        stage.create(config.canvas);
         Object.entries(config).forEach(([key, value]) => {
             switch (key) {
-                case 'debug':
-                case 'trace':
-                case 'layout':
-                case 'start':
-                case 'select':
-                case 'hidden':
-                case 'joystick':
-                case 'hint': break;
                 case 'buttons':
                     buttons = value.length - 1;
                     if (value.length > buttonsLayout.length) {
@@ -603,23 +588,23 @@ function setup(config) {
 
     events.bind();
     controller.init();
-    init();
+    init(stage.ctx);
 }
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function draw(ctx) {
+    ctx.clearRect(0, 0, stage.canvas.width, stage.canvas.height);
     if (!hidden) {
-        if (debug) { helper.debug(); }
-        if (trace) { helper.trace(); }
-        if (joystick) { controller.stick.draw(); }
-        controller.buttons.draw();
+        if (debug) { helper.debug(stage.ctx); }
+        if (trace) { helper.trace(ctx); }
+        if (joystick) { controller.stick.draw(stage.ctx); }
+        controller.buttons.draw(ctx);
     }
 }
 
 const events = {
     bind() {
         const eventNames = ['mousedown', 'mouseup', 'mousemove', 'touchstart', 'touchend', 'touchmove'];
-        eventNames.forEach(eventName => canvas.addEventListener(eventName, CanvasGamepad.events));
+        eventNames.forEach(eventName => stage.canvas.addEventListener(eventName, CanvasGamepad.events));
     },
     listen(event) {
         let e = event;
@@ -795,7 +780,7 @@ const events = {
 };
 
 let helper = {
-    debug() {
+    debug(ctx) {
         let dy = 15;
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.textAlign = 'left';
@@ -810,7 +795,7 @@ let helper = {
             ctx.fillText(text, 10, dy);
         });
     },
-    trace() {
+    trace(ctx) {
         let dy = 15;
         ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.textAlign = 'right';
@@ -834,7 +819,7 @@ let helper = {
         window.requestAnimationFrame(loop);
         return;
     }
-    if (ready) { draw(); }
+    if (ready) { draw(stage.ctx); }
     window.requestAnimationFrame(loop);
 }());
 
@@ -860,8 +845,8 @@ window.CanvasRenderingContext2D.prototype.roundRect = function roundRect(x, y, w
 const CanvasGamepad = {
     setup,
     draw,
-    events: e => events.listen(e),
-    observe: () => events.observe()
+    events: events.listen,
+    observe: events.observe
 };
 
 export default CanvasGamepad;
