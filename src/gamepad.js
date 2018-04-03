@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import importedFont from './font';
+import { appendCss } from './css';
 
 let bit = importedFont;
 
@@ -229,54 +230,7 @@ const stage = {
 };
 
 function css() {
-    const style = document.createElement('style');
-    style.innerHTML = `${''
-        + '\n@font-face {'
-        + "\n\t\tfont-family: 'bit';"
-    + '\n\t\tsrc: url('}${bit}) format('truetype');`
-    + '\n\t\tfont-weight: normal;'
-    + '\n\t\tfont-style: normal;'
-        + '}'
-        + '\n'
-    + '* {'
-    + '\n\t\tpadding: 0;'
-    + '\n\t\tmargin: 0;'
-    + '\n\t\t-webkit-touch-callout: none;'
-    + '\n\t\t-webkit-user-select: none;'
-    + '}'
-    + '\n'
-    + 'html'
-    + '{'
-    + '\n\t\t-ms-touch-action: manipulation;'
-    + '\n\t\ttouch-action: manipulation;'
-    + '\n}'
-    + '\n\n'
-    + 'body'
-    + '{'
-    + '\n\t\twidth:  100%;'
-    + '\n\t\theight: 100%;'
-    + '\n\t\tmargin: 0px;  '
-    + '\n\t\tpadding:0px; '
-    + '\n\t\ttouch-action: none;'
-    + '\n\t\t-ms-touch-action: none;'
-    + '\n\t\toverflow: hidden;'
-    + '\n}'
-    + '\n'
-    + 'canvas'
-    + '{'
-    + '\n\t\timage-rendering: optimizeSpeed;'
-    + '\n\t\timage-rendering: -moz-crisp-edges;'
-    + '\n\t\timage-rendering: -webkit-optimize-contrast;'
-    + '\n\t\timage-rendering: -o-crisp-edges;'
-    + '\n\t\timage-rendering: crisp-edges;'
-    + '\n\t\t-ms-interpolation-mode: nearest-neighbor;'
-    + '\n\t\t touch-action-delay: none;'
-    + '\n\t\ttouch-action: none;'
-    + '\n\t\t-ms-touch-action: none;'
-    + '\n\t\tposition:fixed;'
-    + '\n}'
-    + '\n';
-    document.head.appendChild(style);
+    appendCss();
 
     bit = {
         button: "18px 'bit'",
