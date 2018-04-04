@@ -89,10 +89,28 @@ const colors = {
     }
 };
 
-/*
-** @param buttons {int}
-*/
-let buttons = 0;
+const state = {
+    hasStartButton: true,
+    hasSelectButton: true,
+    startButtonDefault: {
+        x: (width / 3),
+        y: -15,
+        w: 50,
+        h: 15,
+        color: colors.black,
+        name: 'start'
+    },
+    selectButtonDefault: {
+        x: (width / 2),
+        y: -15,
+        w: 50,
+        h: 15,
+        color: colors.black,
+        name: 'select'
+    },
+    startButton: null,
+    selectButton: null
+};
 
 /*
 ** @param buttonsLayout {array}
@@ -175,30 +193,11 @@ let buttonsLayout = [
         }
     ]
 ];
+
 /*
 ** @param buttonLayout {object}
 */
 const buttonLayout = { x: (radius * 3), y: (radius * 3) };
-/*
-** @param buttonsLayoutBuilt {boolean}
-*/
-let buttonsLayoutBuilt = false;
-
-/*
-** @param start {boolean}
-*/
-const start = true;
-const startButton = {
-    x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'start'
-};
-
-/*
-** @param start {boolean}
-*/
-const select = false;
-const selectButton = {
-    x: width / 2, y: -15, w: 50, h: 15, color: colors.black, name: 'select'
-};
 
 /*
 ** @param hidden {boolean}
@@ -291,8 +290,10 @@ const controller = {
                         active: false
                     };
                 } else {
+                    const { hasStartButton, hasSelectButton } = state;
                     button.x = (width / 2) - button.w;
-                    if (start && select) {
+
+                    if (hasStartButton && hasSelectButton) {
                         switch (button.name) {
                             case 'select':
                                 button.x = (width / 2) - button.w - (button.h * 2);
@@ -544,47 +545,29 @@ function init(ctx) {
     setTimeout(() => { ready = true; }, 250);
 }
 
-function setup(config) {
-    const { length } = Object.keys(config);
+function prepareButtons(buttonsList, layoutsList) {
+    const buttons = buttonsList.slice(0, layoutsList.length);
+    const layoutType = layoutsList[buttons.length - 1];
+    return buttons.map((button, index) => Object.assign({}, layoutType[index], button));
+}
+
+function setup({
+    canvas,
+    buttons,
+    select,
+    start
+}) {
     document.addEventListener('touchmove', e => e.preventDefault(), false);
     appendCss();
 
-    if (length) {
-        stage.create(config.canvas);
-        Object.entries(config).forEach(([key, value]) => {
-            switch (key) {
-                case 'buttons':
-                    buttons = value.length - 1;
-                    if (value.length > buttonsLayout.length) {
-                        buttons = buttonsLayout.length - 1;
-                    }
-                    buttonsLayout = buttonsLayout[buttons];
-                    value.forEach(({ name, color, key: btnKey }, index) => {
-                        if (name) {
-                            buttonsLayout[index].name = name;
-                        }
-                        if (color) {
-                            buttonsLayout[index].color = color;
-                        }
-
-                        if (key) {
-                            buttonsLayout[index].key = btnKey;
-                        }
-                        buttonsLayoutBuilt = true;
-                    });
-                    break;
-                default: break;
-            }
-        });
-    } else {
-        stage.create();
-    }
-    if (!buttonsLayoutBuilt) {
-        buttonsLayout = buttonsLayout[buttons];
+    if (buttons) {
+        buttonsLayout = prepareButtons(buttons, buttonsLayout);
     }
 
-    if (start) { buttonsLayout.push(startButton); }
-    if (select) { buttonsLayout.push(selectButton); }
+    stage.create(canvas);
+
+    if (start) { buttonsLayout.push(state.startButtonDefault); }
+    if (select) { buttonsLayout.push(state.selectButtonDefault); }
 
     events.bind();
     controller.init();
@@ -604,7 +587,9 @@ function draw(ctx) {
 const events = {
     bind() {
         const eventNames = ['mousedown', 'mouseup', 'mousemove', 'touchstart', 'touchend', 'touchmove'];
-        eventNames.forEach(eventName => stage.canvas.addEventListener(eventName, CanvasGamepad.events));
+        eventNames.forEach(eventName => (
+            stage.canvas.addEventListener(eventName, CanvasGamepad.events)
+        ));
     },
     listen(event) {
         let e = event;
