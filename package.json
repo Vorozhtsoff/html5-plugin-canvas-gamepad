@@ -75,5 +75,9 @@
     "webpack": "^4.4.1",
     "webpack-cli": "^2.0.13",
     "webpack-dev-server": "^3.1.1"
+  },
+  "dependencies": {
+    "md5": "^2.2.1",
+    "socket.io-client": "^2.1.0"
   }
 }
