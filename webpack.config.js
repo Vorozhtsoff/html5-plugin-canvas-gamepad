@@ -24,8 +24,8 @@ module.exports = {
     },
     devtool: 'eval',
     devServer: {
-        contentBase: path.join(__dirname, "build"),
+        contentBase: path.join(__dirname, 'build'),
         compress: false,
         port: 8080
     }
-}
+};
