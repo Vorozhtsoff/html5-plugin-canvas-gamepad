@@ -4,11 +4,14 @@ const path = require('path');
 const BUILD_PATH = './build';
 
 module.exports = {
-    entry: ['./src/index.js'],
+    entry: {
+        gamepad: ['./src/index.js'],
+        application: ['./src/application.js']
+    },
     output: {
         path: path.resolve(__dirname, BUILD_PATH),
         publicPath: '/',
-        filename: 'index.js'
+        filename: '[name].js'
     },
     module: {
         rules: [
