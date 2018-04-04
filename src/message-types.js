@@ -1,0 +1,10 @@
+export const USER_LOGIN = 'USER_LOGIN';
+export const CHANGE_NAME = 'CHANGE_NAME';
+export const START_GAME = 'START_GAME';
+export const FINISH_GAME = 'FINISH_GAME';
+export const GET_AREA = 'GET_AREA';
+export const GET_SCENE = 'GET_SCENE';
+export const MOVE_PERSON = 'MOVE_PERSON';
+export const SHOT = 'SHOT';
+export const HIT = 'HIT';
+export const DEAD = 'DEAD';
