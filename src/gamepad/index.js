@@ -438,9 +438,9 @@ const controller = {
             if (touches[id].id === 'stick') {
                 if (Math.abs(dx) < (this.radius / 2)) { this.dx = this.x + dx; }
                 if (Math.abs(dy) < (this.radius / 2)) { this.dy = this.y + dy; }
-                console.log(this.dy, this.dx, (this.dx - this.x), (this.dy - this.y), this.radius);
                 map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
-                map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
+                map['y-axis'] = (this.y - this.dy) / (this.radius / 2);
+                console.log(map['y-axis']);
                 map['x-dir'] = toInt(map['x-axis']);
                 map['y-dir'] = toInt(map['y-axis']);
                 handleStick({ ...map });

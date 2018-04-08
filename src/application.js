@@ -11,7 +11,6 @@ window.onload = () => {
     socket.emit(USER_LOGIN, { type: APP_TYPE, id: auth() });
     socket.on(USER_LOGIN, data => log(data));
     socket.on(GET_AREA, (data) => {
-        log('GET_AREA', data);
         canvas = new window.Canvas({
             area: {
                 left: data.CENTER.x - data.X_SIZE / 2,
@@ -29,16 +28,11 @@ window.onload = () => {
 
     socket.on(GET_SCENE, (data) => {
         if (data && data.princess) {
-            log(data);
             if (canvas) {
                 canvas.clear();
                 const CROSS = 1;
                 if (data.dragon) {
                     const dr = data.dragon;
-                    /* canvas.line(dr.position.x,
-                                dr.position.y,
-                                dr.position.x + CROSS * Math.sin(dr.viewDirect),
-                                dr.position.y + CROSS * Math.cos(dr.viewDirect), 'red', 1); */
                     canvas.point(dr.position.x, dr.position.y, dr.size, 'blue'); // Дракон!
                 }
 
@@ -75,17 +69,26 @@ window.onload = () => {
         }
     });
 
-    let val = 0;
-    setInterval(() => {
-        val += 0.1;
-        socket.emit(MOVE_PERSON, { moveDirect: val, viewDirect: val });
-    }, 555);
-
     socket.on(SHOT, data => log('Выстрел!', data));
     socket.on(HIT, data => log('Попадание!', data));
     socket.on(DEAD, (data) => {
         log('Ты помер!', data);
         socket.emit(FINISH_GAME);
     });
+}
 
+const radians = degrees => degrees * Math.PI / 180;
+const degrees = radians => radians * 180 / Math.PI;
+const getAngle = (x, y) => {
+
+    return Math.atan2(x, y);
+}
+
+window.radians = radians;
+window.degrees = degrees;
+
+window.handle = {
+    onStick: data => {
+        socket.emit(MOVE_PERSON, { moveDirect: getAngle(data['x-axis'], data['y-axis']), viewDirect: radians(90) })
+    }
 }

@@ -89,7 +89,6 @@ const game = (() => {
 
             if (player.moving) {
                 player.delay += 1;
-                console.log(player.delay);
                 player.frame = parseInt(player.delay / 5, 10);
 
                 if (player.delay >= 14) {
