@@ -31,7 +31,9 @@ const radius = 25;
 const joystick = true;
 const layout = { x: 0, y: 0 };
 const layoutString = BOTTOM_RIGHT;
-let handleStick = () => null;
+const noop = () => null;
+let leftStickHandler = noop;
+let rightStickHandler = noop;
 
 
 const state = {
@@ -364,9 +366,11 @@ const controller = {
                 if (Math.abs(toDec(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
                 if (Math.abs(toDec(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
                 map[this.X_AXIS] = (this.dx - this.x) / (this.radius / 2);
-                map[this.Y_AXIS] = (this.dy - this.y) / (this.radius / 2);
+                map[this.Y_AXIS] = (this.y - this.dy) / (this.radius / 2);
                 map[this.X_DIR] = Math.round(map[this.X_AXIS]);
                 map[this.Y_DIR] = Math.round(map[this.Y_AXIS]);
+
+                rightStickHandler({ ...map });
 
                 if (dist > (this.radius * 1.5)) {
                     controller.stick.reset();
@@ -440,10 +444,9 @@ const controller = {
                 if (Math.abs(dy) < (this.radius / 2)) { this.dy = this.y + dy; }
                 map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
                 map['y-axis'] = (this.y - this.dy) / (this.radius / 2);
-                console.log(map['y-axis']);
                 map['x-dir'] = toInt(map['x-axis']);
                 map['y-dir'] = toInt(map['y-axis']);
-                handleStick({ ...map });
+                leftStickHandler({ ...map });
 
                 if (dist > (this.radius * 1.5)) {
                     controller.stick.reset();
@@ -484,7 +487,8 @@ const preventDefault = e => e.preventDefault();
 function setup({
     canvas,
     buttons,
-    onStick,
+    onRightStick,
+    onLeftStick,
     select,
     start
 }) {
@@ -495,8 +499,12 @@ function setup({
         buttonsLayout = prepareButtons(buttons, buttonsLayout);
     }
 
-    if (onStick) {
-        handleStick = onStick;
+    if (onLeftStick) {
+        leftStickHandler = onLeftStick;
+    }
+
+    if (onRightStick) {
+        rightStickHandler = onRightStick;
     }
 
     stage.create(canvas);
@@ -583,9 +591,13 @@ const events = {
             */
             if (e.type === 'touchend') {
                 id = e.changedTouches[0].identifier;
+                console.log(e.type);
                 if (touches[id].id === 'stick') {
                     controller.stick.reset();
+                } else if (touches[id].id === 'r-stick') {
+                    controller.rightStick.reset();
                 }
+
                 for (let n = 0; n < buttonsLayout.length; n += 1) {
                     if (touches[id].id === buttonsLayout[n].name) {
                         controller.buttons.reset(n);
@@ -608,7 +620,9 @@ const events = {
                     for (let n = 0; n < buttonsLayout.length; n += 1) {
                         controller.buttons.reset(n);
                     }
+
                     controller.stick.reset();
+                    controller.rightStick.reset();
                 }
             }
         } else {
