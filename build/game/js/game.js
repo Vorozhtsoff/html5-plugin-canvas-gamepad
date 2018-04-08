@@ -66,13 +66,6 @@ const game = (() => {
         draw() {
             ctx.fillStyle = this.c;
             ctx.beginPath();
-            ctx.arc(100, 100, 50, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            ctx.closePath();
-
-
-            ctx.beginPath();
 
             for (let i = 0; i < 2 * Math.PI; i += 0.1) {
                 const x = this.x + (this.r * Math.cos(i));

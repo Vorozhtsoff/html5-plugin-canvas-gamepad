@@ -9,8 +9,8 @@ const createCanvas = (id = 'game') => {
 
 const initialState = {};
 
-const init = ({ CENTER = {}, X_SIZE, Y_SIZE, Z_SIZE } = initialState) => {
-    return new Canvas({
+const init = ({ CENTER = {}, X_SIZE, Y_SIZE, Z_SIZE } = initialState) => (
+    new Canvas({
         area: {
             left: CENTER.x - X_SIZE / 2,
             bottom: CENTER.y - Y_SIZE / 2,
@@ -27,7 +27,7 @@ const init = ({ CENTER = {}, X_SIZE, Y_SIZE, Z_SIZE } = initialState) => {
             mouseUp: mouseUpCallback,
             mouseOut: mouseOutCallback */
         }
-    });
-};
+    })
+);
 
 export default init;
