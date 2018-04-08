@@ -315,7 +315,7 @@ const controller = {
         dy: 0,
         init() {
             this.radius = 40;
-            this.x = width - layout.x + 300;
+            this.x = (width - layout.x) + 300;
             this.y = layout.y;
             this.dx = this.x;
             this.dy = this.y;
@@ -350,13 +350,10 @@ const controller = {
                     switch (type) {
                         case 'mousedown':
                             touches[id].id = 'r-stick';
-                            console.log('mousedown');
                             break;
                         case 'mouseup':
                             delete touches[id].id;
                             controller.rightStick.reset();
-
-                            console.log('mouseup');
                             break;
                         default: break;
                     }
@@ -365,10 +362,10 @@ const controller = {
             if (touches[id].id === 'r-stick') {
                 if (Math.abs(toDec(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
                 if (Math.abs(toDec(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
-                map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
-                map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
-                map['x-dir'] = Math.round(map['x-axis']);
-                map['y-dir'] = Math.round(map['y-axis']);
+                map[this.X_AXIS] = (this.dx - this.x) / (this.radius / 2);
+                map[this.Y_AXIS] = (this.dy - this.y) / (this.radius / 2);
+                map[this.X_DIR] = Math.round(map[this.X_AXIS]);
+                map[this.Y_DIR] = Math.round(map[this.Y_AXIS]);
 
                 if (dist > (this.radius * 1.5)) {
                     controller.stick.reset();
@@ -377,7 +374,6 @@ const controller = {
             }
         },
         reset() {
-            console.log(this);
             this.dx = this.x;
             this.dy = this.y;
             map['x-dir'] = 0;
@@ -453,7 +449,6 @@ const controller = {
             }
         },
         reset() {
-            console.log('stick reset', this);
             this.dx = this.x;
             this.dy = this.y;
             map['x-dir'] = 0;
