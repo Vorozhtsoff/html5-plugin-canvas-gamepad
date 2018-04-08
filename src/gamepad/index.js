@@ -6,6 +6,7 @@ import getWindowSize from './utils/get-window-size';
 import getButtonsLayouts from './config/buttons-layouts';
 import roundReact from './utils/round-react';
 import toDec from './utils/math';
+import drawStick from './draw/stick';
 import {
     TOP_LEFT,
     TOP_RIGHT,
@@ -324,29 +325,15 @@ const controller = {
             map[this.Y_AXIS] = 0;
         },
         draw(ctx) {
-            ctx.fillStyle = colors.joystick.base;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.fillStyle = colors.joystick.dust;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.fillStyle = colors.joystick.stick;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.fillStyle = colors.joystick.ball;
-            ctx.beginPath();
-            ctx.arc(this.dx, this.dy, this.radius - 10, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
+            drawStick({
+                ctx,
+                x: this.x,
+                y: this.y,
+                radius: this.radius,
+                dx: this.dx,
+                dy: this.dy,
+                colors: colors.joystick
+            });
         },
         state(id, type) {
             const touch = {
@@ -406,7 +393,6 @@ const controller = {
         dx: 0,
         dy: 0,
         init() {
-            console.log( 'stick ', this);
             this.radius = 40;
             this.x = width - layout.x;
             this.y = layout.y;
@@ -418,29 +404,15 @@ const controller = {
             map['y-axis'] = 0;
         },
         draw(ctx) {
-            ctx.fillStyle = colors.joystick.base;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.fillStyle = colors.joystick.dust;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.fillStyle = colors.joystick.stick;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.fillStyle = colors.joystick.ball;
-            ctx.beginPath();
-            ctx.arc(this.dx, this.dy, this.radius - 10, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
+            drawStick({
+                ctx,
+                x: this.x,
+                y: this.y,
+                radius: this.radius,
+                dx: this.dx,
+                dy: this.dy,
+                colors: colors.joystick
+            });
         },
         state(id, type) {
             const touch = {
