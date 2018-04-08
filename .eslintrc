@@ -2,7 +2,8 @@
     "extends": "airbnb",
     "rules": {
         "indent": ["error", 4, { "SwitchCase": 1 }],
-        "comma-dangle": ["error", "never"]
+        "comma-dangle": ["error", "never"],
+        "no-mixed-operators": ["error", {}]
     },
     "globals": { "window": true, "document": true }
 }
