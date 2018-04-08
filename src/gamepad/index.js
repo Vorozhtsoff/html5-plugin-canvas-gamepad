@@ -29,7 +29,8 @@ const debug = true;
 const trace = true;
 const hidden = false;
 const radius = 25;
-const joystick = true;
+const leftStick = true;
+const rightStick = true;
 const layout = { x: 0, y: 0 };
 const layoutString = BOTTOM_RIGHT;
 const noop = () => null;
@@ -131,10 +132,11 @@ const controller = {
         }
 
         controller.buttons.init();
-        if (joystick) {
+        if (leftStick) {
             controller.stick.init();
         }
-        if (joystick) {
+
+        if (rightStick) {
             controller.rightStick.init();
         }
     },
@@ -472,8 +474,6 @@ function init(ctx) {
     ctx.textBaseline = 'middle';
     ctx.font = bit.small;
     ctx.fillText('loading', width / 2, height / 2);
-    if (joystick) { controller.stick.draw(stage.ctx); }
-    controller.buttons.draw();
     setTimeout(() => { ready = true; }, 250);
 }
 
@@ -542,8 +542,11 @@ function draw(ctx) {
 
             });
         }
-        if (joystick) {
+        if (leftStick) {
             controller.stick.draw(stage.ctx);
+        }
+
+        if (rightStick) {
             controller.rightStick.draw(stage.ctx);
         }
 
