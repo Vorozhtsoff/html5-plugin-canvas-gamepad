@@ -255,8 +255,8 @@ const controller = {
                 const button = buttonsLayout[n];
                 const { name } = button;
 
-                const dx = toDec(touch.x - button.dx);
-                const dy = toDec(touch.y - button.dy);
+                const dx = touch.x - button.dx;
+                const dy = touch.y - button.dy;
                 let dist = width;
                 if (button.r) {
                     dist = toDec(Math.sqrt((dx * dx) + (dy * dy)));
@@ -353,8 +353,8 @@ const controller = {
                 x: touches[id].x,
                 y: touches[id].y
             };
-            const dx = toDec(touch.x - this.x);
-            const dy = toDec(touch.y - this.y);
+            const dx = touch.x - this.x;
+            const dy = touch.y - this.y;
             const dist = toDec(Math.sqrt((dx * dx) + (dy * dy)));
             if (dist < (this.radius * 1.5)) {
                 if (!type) {
