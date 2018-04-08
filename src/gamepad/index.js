@@ -2,7 +2,7 @@
 import { appendCss } from './utils/css';
 import bit from './config/button-size';
 import colors from './config/colors';
-import getWindowSize from './utils/getWindowSize';
+import getWindowSize from './utils/get-window-size';
 import getButtonsLayouts from './config/buttons-layouts';
 import roundReact from './utils/round-react';
 import {
