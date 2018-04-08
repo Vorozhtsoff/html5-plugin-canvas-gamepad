@@ -228,7 +228,7 @@ const controller = {
                     ctx.fillStyle = color;
                     if (button.hit) {
                         if (button.hit.active) {
-                            stage.ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
+                            ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
                         }
                     }
                     ctx.roundRect(x, y, w, h, r).fill();
@@ -559,7 +559,7 @@ const events = {
     bind() {
         const eventNames = ['mousedown', 'mouseup', 'mousemove', 'touchstart', 'touchend', 'touchmove'];
         eventNames.forEach(eventName => (
-            stage.canvas.addEventListener(eventName, CanvasGamepad.events)
+            stage.canvas.addEventListener(eventName, this.listen)
         ));
     },
     listen(event) {
