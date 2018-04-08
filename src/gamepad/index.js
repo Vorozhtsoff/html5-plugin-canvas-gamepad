@@ -321,7 +321,7 @@ const controller = {
         dy: 0,
         init() {
             this.radius = 40;
-            this.x = (width - layout.x) + 300;
+            this.x = width - (width - layout.x);
             this.y = layout.y;
             this.dx = this.x;
             this.dy = this.y;
@@ -474,7 +474,7 @@ function init(ctx) {
     ctx.textBaseline = 'middle';
     ctx.font = bit.small;
     ctx.fillText('loading', width / 2, height / 2);
-    setTimeout(() => { ready = true; }, 250);
+    ready = true;
 }
 
 function prepareButtons(buttonsList, layoutsList) {
