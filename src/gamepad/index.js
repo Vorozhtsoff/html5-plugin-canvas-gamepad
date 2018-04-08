@@ -5,7 +5,7 @@ import colors from './config/colors';
 import getWindowSize from './utils/get-window-size';
 import getButtonsLayouts from './config/buttons-layouts';
 import roundReact from './utils/round-react';
-import { toDec, toInt } from './utils/math';
+import { toDec, toInt } from '../utils/math';
 import drawStick from './draw/stick';
 import {
     TOP_LEFT,
@@ -42,7 +42,7 @@ const state = {
     hasStartButton: true,
     hasSelectButton: true,
     startButtonDefault: {
-        x: (width / 3),
+        x: (width / 2),
         y: -15,
         w: 50,
         h: 15,
@@ -646,6 +646,7 @@ const events = {
             const keys = e;
             let dir = 0;
             Object.entries(keys).forEach(([prop]) => {
+                console.log('prop', keys, dir);
                 switch (prop) {
                     case '%':// left
                         if (keys[prop]) { dir += 1; }
@@ -688,6 +689,7 @@ const events = {
                 }
                 controller.stick.dx = controller.stick.x;
                 controller.stick.dy = controller.stick.y;
+                console.log(dir);
                 switch (dir) {
                     case 1:// left
                         controller.stick.dx = controller.stick.x - (controller.stick.radius / 2);
