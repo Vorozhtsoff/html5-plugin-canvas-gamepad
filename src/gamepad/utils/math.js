@@ -5,6 +5,3 @@ export const radians = degrees => degrees * Math.PI / 180;
 export const degrees = radians => radians * 180 / Math.PI;
 
 export const getAngle = (x, y) => Math.atan(x/y);
-
-console.log(getAngle(1,1) === radians(45))
-window.getAngle = getAngle;
