@@ -1,93 +1,35 @@
 /* eslint-disable no-use-before-define */
-import { appendCss } from './css';
+import { appendCss } from './utils/css';
+import bit from './config/button-size';
+import colors from './config/colors';
+import getWindowSize from './utils/getWindowSize';
+import getButtonsLayouts from './config/buttons-layouts';
+import roundReact from './utils/round-react';
+import {
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT
+} from './consts';
 
-const bit = {
-    button: "18px 'bit'",
-    small: "12px 'bit'",
-    medium: "16px 'bit'",
-    large: "24px 'bit'",
-    huge: "48px 'bit'"
-};
+const { width, height } = getWindowSize();
 
-const width = window.innerWidth;
-const height = window.innerHeight;
-
-const scale = [
-    (window.innerWidth / width),
-    (window.innerHeight / height)
-];
+const scale = [1, 1];
 
 let touches = {};
 const map = {};
 
-/*
-** @param toggle {boolean}
-*/
 let toggle = false;
-
-/*
-** @param ready {boolean}
-*/
 let ready = false;
-
-/*
-** @param hint {boolean}
-*/
 const hint = false;
-
-/*
-* @param debug {boolean}
-*/
-const debug = false;
-/*
-** @param debug {boolean}
-*/
-const trace = false;
-
-/*
-** @param hidden {boolean}
-*/
+const debug = true;
+const trace = true;
 const hidden = false;
-
-/*
-** @param position {string}
-** @description
-** TOP_LEFT | TOP_RIGHT | BOTTOM_LEFT | BOTTOM_RIGHT
-*/
-let layout = 'BOTTOM_RIGHT';
-
-
-/*
-    ** @param radius {int}
-    */
 const radius = 25;
+const joystick = true;
+const layout = { x: 0, y: 0 };
+const layoutString = BOTTOM_RIGHT;
 
-/*
-** @param opacity {float} (0.0 -> 1.0)
-** @description opacity
-*/
-const opacity = 0.4;
-
-/*
-** @param colors {object}
-** @description color collection used in app in rgba format
-*/
-const colors = {
-    red: `rgba(255,0,0,${opacity})`,
-    green: `rgba(0,255,0,${opacity})`,
-    blue: `rgba(0,0,255,${opacity})`,
-    purple: `rgba(255,0,255,${opacity})`,
-    yellow: `rgba(255,255,0,${opacity})`,
-    cyan: `rgba(0,255,255,${opacity})`,
-    black: `rgba(0,0,0,${opacity})`,
-    white: `rgba(255,255,255,${opacity})`,
-    joystick: {
-        base: `rgba(0,0,0,${opacity})`,
-        dust: `rgba(0,0,0,${opacity})`,
-        stick: 'rgba(204,204,204,1)',
-        ball: 'rgba(255,255,255,1)'
-    }
-};
 
 const state = {
     hasStartButton: true,
@@ -112,97 +54,10 @@ const state = {
     selectButton: null
 };
 
-/*
-** @param buttonsLayout {array}
-*/
-let buttonsLayout = [
-    [{
-        x: 0,
-        y: 0,
-        r: radius,
-        color: colors.red,
-        name: 'a'
-    }],
-    [
-        {
-            x: -(radius / 4),
-            y: radius + (radius / 2),
-            r: radius,
-            color: colors.red,
-            name: 'a'
-        },
-        {
-            x: (radius + (radius / 0.75)),
-            y: -radius + (radius / 2),
-            r: radius,
-            color: colors.green,
-            name: 'b'
-        }
-    ],
-    [
-        {
-            x: -radius * 0.75,
-            y: radius * 2,
-            r: radius,
-            color: colors.red,
-            name: 'a'
-        },
-        {
-            x: radius * 1.75,
-            y: radius,
-            r: radius,
-            color: colors.green,
-            name: 'b'
-        },
-        {
-            x: radius * 3.5,
-            y: -radius,
-            r: radius,
-            color: colors.blue,
-            name: 'c'
-        }
-    ],
-    [
-        {
-            x: -radius,
-            y: radius,
-            r: radius,
-            color: colors.red,
-            name: 'a'
-        },
-        {
-            x: (radius * 2) - radius,
-            y: -(radius + (radius)) + radius,
-            r: radius,
-            color: colors.green,
-            name: 'b'
-        },
-        {
-            x: (radius * 2) - radius,
-            y: (radius + radius) + radius,
-            r: radius,
-            color: colors.blue,
-            name: 'x'
-        },
-        {
-            x: radius * 3,
-            y: 0 + radius,
-            r: radius,
-            color: colors.purple,
-            name: 'y'
-        }
-    ]
-];
+let buttonsLayout = getButtonsLayouts(radius, colors);
 
-/*
-** @param buttonLayout {object}
-*/
 const buttonLayout = { x: (radius * 3), y: (radius * 3) };
 
-/*
-** @param hidden {boolean}
-*/
-const joystick = true;
 
 const stage = {
     canvas: null,
@@ -235,11 +90,9 @@ const stage = {
 
 const controller = {
     init() {
-        const layoutString = layout;
         let shift = null;
-        layout = { x: 0, y: 0 };
         switch (layoutString) {
-            case 'TOP_LEFT':
+            case TOP_LEFT:
                 shift = 0;
                 buttonsLayout.forEach((button) => {
                     if (button.r) {
@@ -248,13 +101,13 @@ const controller = {
                     }
                 });
                 layout.x = shift + buttonLayout.x;
-                layout.y = 0 + buttonLayout.y;
+                layout.y = +buttonLayout.y;
                 break;
-            case 'TOP_RIGHT':
+            case TOP_RIGHT:
                 layout.x = width - buttonLayout.x;
-                layout.y = 0 + buttonLayout.y;
+                layout.y = +buttonLayout.y;
                 break;
-            case 'BOTTOM_LEFT':
+            case BOTTOM_LEFT:
                 shift = 0;
                 buttonsLayout.forEach((button) => {
                     if (button.r) {
@@ -264,7 +117,7 @@ const controller = {
                 layout.x = shift + buttonLayout.x;
                 layout.y = height - buttonLayout.y;
                 break;
-            case 'BOTTOM_RIGHT':
+            case BOTTOM_RIGHT:
                 layout.x = width - buttonLayout.x;
                 layout.y = height - buttonLayout.y;
                 break;
@@ -272,7 +125,12 @@ const controller = {
         }
 
         controller.buttons.init();
-        if (joystick) { controller.stick.init(); }
+        if (joystick) {
+            controller.stick.init();
+        }
+        if (joystick) {
+            controller.rightStick.init();
+        }
     },
     buttons: {
         init() {
@@ -443,7 +301,11 @@ const controller = {
             map[name] = 0;
         }
     },
-    stick: {
+    rightStick: {
+        X_DIR: 'RIGHT_STICK_X_DIR',
+        Y_DIR: 'RIGHT_STICK_Y_DIR',
+        X_AXIS: 'RIGHT_STICK_X_AXIS',
+        Y_AXIS: 'RIGHT_STICK_Y_AXIS',
         radius: 40,
         x: 0,
         y: 0,
@@ -451,7 +313,101 @@ const controller = {
         dy: 0,
         init() {
             this.radius = 40;
-            this.x = (width) - (layout.x);
+            this.x = width - layout.x + 300;
+            this.y = layout.y;
+            this.dx = this.x;
+            this.dy = this.y;
+            map[this.X_DIR] = 0;
+            map[this.Y_DIR] = 0;
+            map[this.X_AXIS] = 0;
+            map[this.Y_AXIS] = 0;
+        },
+        draw(ctx) {
+            ctx.fillStyle = colors.joystick.base;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.fillStyle = colors.joystick.dust;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius - 5, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.fillStyle = colors.joystick.stick;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.fillStyle = colors.joystick.ball;
+            ctx.beginPath();
+            ctx.arc(this.dx, this.dy, this.radius - 10, 0, 2 * Math.PI, false);
+            ctx.fill();
+            ctx.closePath();
+        },
+        state(id, type) {
+            const touch = {
+                x: touches[id].x,
+                y: touches[id].y
+            };
+            const dx = parseInt(touch.x - this.x, 10);
+            const dy = parseInt(touch.y - this.y, 10);
+            const dist = parseInt(Math.sqrt((dx * dx) + (dy * dy)), 10);
+            if (dist < (this.radius * 1.5)) {
+                if (!type) {
+                    touches[id].id = 'r-stick';
+                } else {
+                    switch (type) {
+                        case 'mousedown':
+                            touches[id].id = 'r-stick';
+                            console.log('mousedown');
+                            break;
+                        case 'mouseup':
+                            delete touches[id].id;
+                            controller.rightStick.reset();
+
+                            console.log('mouseup');
+                            break;
+                        default: break;
+                    }
+                }
+            }
+            if (touches[id].id === 'r-stick') {
+                if (Math.abs(parseInt(dx, 10)) < (this.radius / 2)) { this.dx = this.x + dx; }
+                if (Math.abs(parseInt(dy, 10)) < (this.radius / 2)) { this.dy = this.y + dy; }
+                map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
+                map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
+                map['x-dir'] = Math.round(map['x-axis']);
+                map['y-dir'] = Math.round(map['y-axis']);
+
+                if (dist > (this.radius * 1.5)) {
+                    controller.stick.reset();
+                    delete touches[id].id;
+                }
+            }
+        },
+        reset() {
+            console.log(this);
+            this.dx = this.x;
+            this.dy = this.y;
+            map['x-dir'] = 0;
+            map['y-dir'] = 0;
+            map['x-axis'] = 0;
+            map['y-axis'] = 0;
+        }
+    },
+    stick: {
+        radius: 40,
+        x: 0,
+        y: 0,
+        dx: 0,
+        dy: 0,
+        init() {
+            console.log( 'stick ', this);
+            this.radius = 40;
+            this.x = width - layout.x;
             this.y = layout.y;
             this.dx = this.x;
             this.dy = this.y;
@@ -524,6 +480,7 @@ const controller = {
             }
         },
         reset() {
+            console.log('stick reset', this);
             this.dx = this.x;
             this.dy = this.y;
             map['x-dir'] = 0;
@@ -551,13 +508,15 @@ function prepareButtons(buttonsList, layoutsList) {
     return buttons.map((button, index) => Object.assign({}, layoutType[index], button));
 }
 
+const preventDefault = e => e.preventDefault();
+
 function setup({
     canvas,
     buttons,
     select,
     start
 }) {
-    document.addEventListener('touchmove', e => e.preventDefault(), false);
+    document.addEventListener('touchmove', preventDefault);
     appendCss();
 
     if (buttons) {
@@ -566,8 +525,13 @@ function setup({
 
     stage.create(canvas);
 
-    if (start) { buttonsLayout.push(state.startButtonDefault); }
-    if (select) { buttonsLayout.push(state.selectButtonDefault); }
+    if (start) {
+        buttonsLayout.push(state.startButtonDefault);
+    }
+
+    if (select) {
+        buttonsLayout.push(state.selectButtonDefault);
+    }
 
     events.bind();
     controller.init();
@@ -579,7 +543,12 @@ function draw(ctx) {
     if (!hidden) {
         if (debug) { helper.debug(stage.ctx); }
         if (trace) { helper.trace(ctx); }
-        if (joystick) { controller.stick.draw(stage.ctx); }
+        if (joystick) {
+            controller.stick.draw(stage.ctx);
+        }
+        if (joystick) {
+            controller.rightStick.draw(stage.ctx);
+        }
         controller.buttons.draw(ctx);
     }
 }
@@ -617,12 +586,14 @@ const events = {
                     case 'touchstart':
                     case 'touchmove':
                         controller.stick.state(i);
+                        controller.rightStick.state(i);
                         buttonsLayout.forEach((ns, idx) => controller.buttons.state(i, idx));
                         break;
                     case 'mousedown':
                     case 'mousemove':
                     case 'mouseup':
                         controller.stick.state(i, eventType);
+                        controller.rightStick.state(i, eventType);
                         buttonsLayout.forEach((ns, idx) => (
                             controller.buttons.state(i, idx, eventType)
                         ));
@@ -800,32 +771,15 @@ let helper = {
 
 (function loop() {
     toggle = !toggle;
-    if (toggle) {
-        window.requestAnimationFrame(loop);
-        return;
+
+    if (!toggle && ready) {
+        draw(stage.ctx);
     }
-    if (ready) { draw(stage.ctx); }
+
     window.requestAnimationFrame(loop);
 }());
 
-window.CanvasRenderingContext2D.prototype.roundRect = function roundRect(x, y, w, h, r) {
-    let rad;
-    if (w < 2 * r) {
-        rad = w / 2;
-    }
-    if (h < 2 * r) {
-        rad = h / 2;
-    }
-
-    this.beginPath();
-    this.moveTo(x + rad, y);
-    this.arcTo(x + w, y, x + w, y + h, rad);
-    this.arcTo(x + w, y + h, x, y + h, rad);
-    this.arcTo(x, y + h, x, y, rad);
-    this.arcTo(x, y, x + w, y, rad);
-    this.closePath();
-    return this;
-};
+window.CanvasRenderingContext2D.prototype.roundRect = roundReact;
 
 const CanvasGamepad = {
     setup,

@@ -1,4 +1,4 @@
-import font from './font';
+import font from '../config/font';
 
 const getStyles = fontSrc => (
     `@font-face { font-family: 'bit'; src: url( ${fontSrc}) format('truetype'); font-weight: normal; font-style: normal; }`
