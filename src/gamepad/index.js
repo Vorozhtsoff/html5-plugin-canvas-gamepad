@@ -5,6 +5,7 @@ import colors from './config/colors';
 import getWindowSize from './utils/get-window-size';
 import getButtonsLayouts from './config/buttons-layouts';
 import roundReact from './utils/round-react';
+import toDec from './utils/math';
 import {
     TOP_LEFT,
     TOP_RIGHT,
@@ -254,11 +255,11 @@ const controller = {
                 const button = buttonsLayout[n];
                 const { name } = button;
 
-                const dx = parseInt(touch.x - button.dx, 10);
-                const dy = parseInt(touch.y - button.dy, 10);
+                const dx = toDec(touch.x - button.dx);
+                const dy = toDec(touch.y - button.dy);
                 let dist = width;
                 if (button.r) {
-                    dist = parseInt(Math.sqrt((dx * dx) + (dy * dy)), 10);
+                    dist = toDec(Math.sqrt((dx * dx) + (dy * dy)));
                 } else if (
                     touch.x > button.hit.x[0] &&
                     touch.x < button.hit.x[1] &&
@@ -352,9 +353,9 @@ const controller = {
                 x: touches[id].x,
                 y: touches[id].y
             };
-            const dx = parseInt(touch.x - this.x, 10);
-            const dy = parseInt(touch.y - this.y, 10);
-            const dist = parseInt(Math.sqrt((dx * dx) + (dy * dy)), 10);
+            const dx = toDec(touch.x - this.x);
+            const dy = toDec(touch.y - this.y);
+            const dist = toDec(Math.sqrt((dx * dx) + (dy * dy)));
             if (dist < (this.radius * 1.5)) {
                 if (!type) {
                     touches[id].id = 'r-stick';
@@ -375,8 +376,8 @@ const controller = {
                 }
             }
             if (touches[id].id === 'r-stick') {
-                if (Math.abs(parseInt(dx, 10)) < (this.radius / 2)) { this.dx = this.x + dx; }
-                if (Math.abs(parseInt(dy, 10)) < (this.radius / 2)) { this.dy = this.y + dy; }
+                if (Math.abs(toDec(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
+                if (Math.abs(toDec(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
                 map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
                 map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
                 map['x-dir'] = Math.round(map['x-axis']);
@@ -446,9 +447,9 @@ const controller = {
                 x: touches[id].x,
                 y: touches[id].y
             };
-            const dx = parseInt(touch.x - this.x, 10);
-            const dy = parseInt(touch.y - this.y, 10);
-            const dist = parseInt(Math.sqrt((dx * dx) + (dy * dy)), 10);
+            const dx = touch.x - this.x;
+            const dy = touch.y - this.y;
+            const dist = toDec(Math.sqrt((dx * dx) + (dy * dy)));
             if (dist < (this.radius * 1.5)) {
                 if (!type) {
                     touches[id].id = 'stick';
@@ -466,8 +467,8 @@ const controller = {
                 }
             }
             if (touches[id].id === 'stick') {
-                if (Math.abs(parseInt(dx, 10)) < (this.radius / 2)) { this.dx = this.x + dx; }
-                if (Math.abs(parseInt(dy, 10)) < (this.radius / 2)) { this.dy = this.y + dy; }
+                if (Math.abs(toDec(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
+                if (Math.abs(toDec(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
                 map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
                 map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
                 map['x-dir'] = Math.round(map['x-axis']);
