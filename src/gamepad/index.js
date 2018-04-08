@@ -13,6 +13,7 @@ import {
     BOTTOM_LEFT,
     BOTTOM_RIGHT
 } from './consts';
+import { drawDebug, drawTrace } from './helpers';
 
 const { width, height } = getWindowSize();
 
@@ -525,14 +526,27 @@ function setup({
 function draw(ctx) {
     ctx.clearRect(0, 0, stage.canvas.width, stage.canvas.height);
     if (!hidden) {
-        if (debug) { helper.debug(stage.ctx); }
-        if (trace) { helper.trace(ctx); }
+        if (debug) {
+            drawDebug({
+                fontSize: bit.small,
+                width,
+                ctx,
+                map
+            });
+        }
+        if (trace) {
+            drawTrace({
+                map: touches,
+                ctx,
+                fontSize: bit.small
+
+            });
+        }
         if (joystick) {
             controller.stick.draw(stage.ctx);
-        }
-        if (joystick) {
             controller.rightStick.draw(stage.ctx);
         }
+
         controller.buttons.draw(ctx);
     }
 }
@@ -591,7 +605,6 @@ const events = {
             */
             if (e.type === 'touchend') {
                 id = e.changedTouches[0].identifier;
-                console.log(e.type);
                 if (touches[id].id === 'stick') {
                     controller.stick.reset();
                 } else if (touches[id].id === 'r-stick') {
@@ -722,40 +735,6 @@ const events = {
     },
     observe() {
         return events.broadcast();
-    }
-};
-
-let helper = {
-    debug(ctx) {
-        let dy = 15;
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.font = bit.medium;
-        ctx.fillText('debug', 10, dy);
-        ctx.font = bit.small;
-        dy += 5;
-        Object.keys(touches).forEach((prop) => {
-            dy += 10;
-            const text = `${prop} : ${JSON.stringify(touches[prop]).slice(1, -1)}`;
-            ctx.fillText(text, 10, dy);
-        });
-    },
-    trace(ctx) {
-        let dy = 15;
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.font = bit.medium;
-        ctx.fillText('trace', width - 10, dy);
-        ctx.font = bit.small;
-        dy += 5;
-        Object.keys(map).forEach((prop) => {
-            dy += 10;
-            const text = `${prop} : ${map[prop]}`;
-
-            ctx.fillText(text, width - 10, dy);
-        });
     }
 };
 
