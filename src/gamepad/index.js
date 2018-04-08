@@ -5,7 +5,7 @@ import colors from './config/colors';
 import getWindowSize from './utils/get-window-size';
 import getButtonsLayouts from './config/buttons-layouts';
 import roundReact from './utils/round-react';
-import toDec from './utils/math';
+import { toDec, toInt } from './utils/math';
 import drawStick from './draw/stick';
 import {
     TOP_LEFT,
@@ -31,6 +31,7 @@ const radius = 25;
 const joystick = true;
 const layout = { x: 0, y: 0 };
 const layoutString = BOTTOM_RIGHT;
+let handleStick = () => null;
 
 
 const state = {
@@ -435,12 +436,14 @@ const controller = {
                 }
             }
             if (touches[id].id === 'stick') {
-                if (Math.abs(toDec(dx)) < (this.radius / 2)) { this.dx = this.x + dx; }
-                if (Math.abs(toDec(dy)) < (this.radius / 2)) { this.dy = this.y + dy; }
+                if (Math.abs(dx) < (this.radius / 2)) { this.dx = this.x + dx; }
+                if (Math.abs(dy) < (this.radius / 2)) { this.dy = this.y + dy; }
+                console.log(this.dy, this.dx, (this.dx - this.x), (this.dy - this.y), this.radius);
                 map['x-axis'] = (this.dx - this.x) / (this.radius / 2);
                 map['y-axis'] = (this.dy - this.y) / (this.radius / 2);
-                map['x-dir'] = Math.round(map['x-axis']);
-                map['y-dir'] = Math.round(map['y-axis']);
+                map['x-dir'] = toInt(map['x-axis']);
+                map['y-dir'] = toInt(map['y-axis']);
+                handleStick({ ...map });
 
                 if (dist > (this.radius * 1.5)) {
                     controller.stick.reset();
@@ -481,6 +484,7 @@ const preventDefault = e => e.preventDefault();
 function setup({
     canvas,
     buttons,
+    onStick,
     select,
     start
 }) {
@@ -489,6 +493,10 @@ function setup({
 
     if (buttons) {
         buttonsLayout = prepareButtons(buttons, buttonsLayout);
+    }
+
+    if (onStick) {
+        handleStick = onStick;
     }
 
     stage.create(canvas);
