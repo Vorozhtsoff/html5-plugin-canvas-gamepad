@@ -61,7 +61,8 @@ const state = {
     selectButton: null
 };
 
-let buttonsLayout = getButtonsLayouts(radius, colors);
+const defaultButtonsLoyaout = getButtonsLayouts(radius, colors);
+let buttonsLayout;
 
 const buttonLayout = { x: (radius * 3), y: (radius * 3) };
 
@@ -181,7 +182,7 @@ const controller = {
                 map[button.name] = 0;
             }
         },
-        draw() {
+        draw(ctx) {
             for (let n = 0; n < buttonsLayout.length; n += 1) {
                 const button = buttonsLayout[n];
                 const { color } = button;
@@ -196,60 +197,60 @@ const controller = {
                 if (r) {
                     if (button.hit) {
                         if (button.hit.active) {
-                            stage.ctx.fillStyle = color;
-                            stage.ctx.beginPath();
-                            stage.ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
-                            stage.ctx.fill();
-                            stage.ctx.closePath();
+                            ctx.fillStyle = color;
+                            ctx.beginPath();
+                            ctx.arc(x, y, r + 5, 0, 2 * Math.PI, false);
+                            ctx.fill();
+                            ctx.closePath();
                         }
                     }
 
-                    stage.ctx.fillStyle = color;
-                    stage.ctx.beginPath();
-                    stage.ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-                    stage.ctx.fill();
-                    stage.ctx.closePath();
-                    stage.ctx.strokeStyle = color;
-                    stage.ctx.lineWidth = 2;
-                    stage.ctx.stroke();
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
 
-                    stage.ctx.fillStyle = 'rgba(255,255,255,1)';
-                    stage.ctx.textAlign = 'center';
-                    stage.ctx.textBaseline = 'middle';
-                    stage.ctx.font = bit.button;
-                    stage.ctx.fillText(button.name, x, y);
+                    ctx.fillStyle = 'rgba(255,255,255,1)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = bit.button;
+                    ctx.fillText(button.name, x, y);
                 } else {
                     const { h } = button;
                     w = button.w; // eslint-disable-line prefer-destructuring
                     x = button.x; // eslint-disable-line prefer-destructuring
                     y = button.dy;
                     r = 10;
-                    stage.ctx.fillStyle = color;
+                    ctx.fillStyle = color;
                     if (button.hit) {
                         if (button.hit.active) {
                             stage.ctx.roundRect(x - 5, y - 5, w + 10, h + 10, r * 2).fill();
                         }
                     }
-                    stage.ctx.roundRect(x, y, w, h, r).fill();
-                    stage.ctx.strokeStyle = color;
-                    stage.ctx.lineWidth = 2;
-                    stage.ctx.stroke();
-                    stage.ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    stage.ctx.textAlign = 'center';
-                    stage.ctx.textBaseline = 'middle';
-                    stage.ctx.font = bit.button;
-                    stage.ctx.fillText(button.name, x + (w / 2), y + (h * 2));
+                    ctx.roundRect(x, y, w, h, r).fill();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = bit.button;
+                    ctx.fillText(button.name, x + (w / 2), y + (h * 2));
                 }
 
                 if (button.key && hint) {
-                    stage.ctx.fillStyle = 'rgba(0,0,0,0.25)';
-                    stage.ctx.textAlign = 'center';
-                    stage.ctx.textBaseline = 'middle';
-                    stage.ctx.font = bit.button;
+                    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = bit.button;
                     if (button.name === 'start' || button.name === 'select') {
                         x += w / 2;
                     }
-                    stage.ctx.fillText(button.key, x, y - (r * 1.5));
+                    ctx.fillText(button.key, x, y - (r * 1.5));
                 }
             }
         },
@@ -497,7 +498,7 @@ function setup({
     appendCss();
 
     if (buttons) {
-        buttonsLayout = prepareButtons(buttons, buttonsLayout);
+        buttonsLayout = prepareButtons(buttons, defaultButtonsLoyaout);
     }
 
     if (onLeftStick) {
@@ -543,11 +544,11 @@ function draw(ctx) {
             });
         }
         if (leftStick) {
-            controller.stick.draw(stage.ctx);
+            controller.stick.draw(ctx);
         }
 
         if (rightStick) {
-            controller.rightStick.draw(stage.ctx);
+            controller.rightStick.draw(ctx);
         }
 
         controller.buttons.draw(ctx);
