@@ -2,7 +2,9 @@ import io from 'socket.io-client';
 import config from './config';
 import auth from './auth';
 import log from './utils/logger';
+import { getAngle } from './utils/math';
 import { USER_LOGIN, MOVE_PERSON, SHOT, HIT, DEAD, CHANGE_NAME, START_GAME, FINISH_GAME, GET_AREA, GET_SCENE } from './message-types';
+
 const socket = io(config.host);
 const APP_TYPE = 'phone';
 let canvas;
@@ -19,8 +21,8 @@ window.onload = () => {
                 height: data.Y_SIZE,
                 z: data.Z_SIZE
             },
-            width: 640,
-            height: 360
+            width: window.innerWidth,
+            height: window.innerHeight
         });
     });
 
@@ -75,20 +77,40 @@ window.onload = () => {
         log('Ты помер!', data);
         socket.emit(FINISH_GAME);
     });
-}
+};
 
-const radians = degrees => degrees * Math.PI / 180;
-const degrees = radians => radians * 180 / Math.PI;
-const getAngle = (x, y) => {
-
-    return Math.atan2(x, y);
-}
-
-window.radians = radians;
-window.degrees = degrees;
-
-window.handle = {
-    onStick: data => {
-        socket.emit(MOVE_PERSON, { moveDirect: getAngle(data['x-axis'], data['y-axis']), viewDirect: radians(90) })
+const handle = {
+    onLeftStick(data) {
+        socket.emit(
+            MOVE_PERSON,
+            {
+                moveDirect: getAngle(data['x-axis'], data['y-axis']),
+                viewDirect: getAngle(data.RIGHT_STICK_X_AXIS, data.RIGHT_STICK_Y_AXIS)
+            }
+        );
+    },
+    onRightStick() {
+        socket.emit(SHOT);
     }
-}
+};
+
+
+window.CanvasGamepad.setup({
+    canvas: 'controller',
+    start: { name: 'start', key: 'b' },
+    select: { name: 'select', key: 'v' },
+    trace: true,
+    leftStick: true,
+    rightStick: true,
+    debug: true,
+    hint: true,
+    onStick: handle.onStick,
+    buttons: [
+        { name: 'a', key: 's' },
+        { name: 'b', key: 'a' },
+        { name: 'x', key: 'w' },
+        { name: 'y', key: 'q' }
+    ]
+});
+
+window.multikey.setup(window.CanvasGamepad.events, 'qwasbv', true);

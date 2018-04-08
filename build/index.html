@@ -44,37 +44,18 @@
           touch-action: none;
           -ms-touch-action: none;
       }
+
+      #controller {
+          z-index: 1000;
+      }
   </style>
   </head>
   <body>
     <canvas id="game"></canvas>
     <script src="http://dragonslay.htc-cs.ru/js/modules/canvas.js"></script>
-      <script src="/game/js/game.js"></script>
       <script src="https://cdn.rawgit.com/32teeth/multikey.js/master/js/multikey.js"></script>
       <script src="/gamepad.js"></script>
       <script src="/application.js"></script>
-    <script>
-      CanvasGamepad.setup(
-        {
-          canvas:"controller",
-          start:{ name:"start", key:"b" },
-          select:{ name:"select", key:"v" },
-          trace:true,
-          leftStick: true,
-          rightStick: true,
-          debug:true,
-          hint:true,
-          onStick: handle.onStick,
-          buttons:[
-            {name:"a", "key":"s"},
-            {name:"b", "key":"a"},
-            {name:"x", "key":"w"},
-            {name:"y", "key":"q"}
-          ]
-        }
-      );
-      multikey.setup(CanvasGamepad.events, "qwasbv", true);
-    </script>
   </body>
 </html>
 
