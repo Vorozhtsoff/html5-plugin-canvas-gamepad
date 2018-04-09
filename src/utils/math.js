@@ -4,4 +4,4 @@ export const toInt = i => Math[i > 0 ? 'ceil' : 'floor'](i);
 export const toRadians = degrees => degrees * Math.PI / 180;
 export const toDegrees = radians => radians * 180 / Math.PI;
 
-export const getAngle = (x, y) => Math.atan(x / y);
+export const getAngle = (x, y) => Math.atan2(x, y);
