@@ -1,13 +1,19 @@
 import io from 'socket.io-client';
+import throttle from 'lodash/throttle';
 import config from './config';
 import auth from './auth';
 import log from './utils/logger';
 import { getAngle } from './utils/math';
+import iterateObject from './utils/iterate-object';
 import { USER_LOGIN, MOVE_PERSON, SHOT, HIT, DEAD, CHANGE_NAME, START_GAME, FINISH_GAME, GET_AREA, GET_SCENE } from './message-types';
 
 const socket = io(config.host);
 const APP_TYPE = 'phone';
 let canvas;
+
+const drawDragon = ({ position, size }) => (
+    canvas.point(position.x, position.y, size, 'blue')
+);
 
 window.onload = () => {
     socket.emit(USER_LOGIN, { type: APP_TYPE, id: auth() });
@@ -29,45 +35,46 @@ window.onload = () => {
     socket.emit(START_GAME);
 
     socket.on(GET_SCENE, (data) => {
-        if (data && data.princess) {
-            if (canvas) {
-                canvas.clear();
-                const CROSS = 1;
-                if (data.dragon) {
-                    const dr = data.dragon;
-                    canvas.point(dr.position.x, dr.position.y, dr.size, 'blue'); // Дракон!
-                }
+        const CROSS = 1;
 
-                for (var key in data.booms) {
-                    if (data.booms[key]) {
-                        const bm = data.booms[key];
-                        canvas.point(bm.position.x, bm.position.y, bm.radius, 'black'); // бум!
-                    }
-                }
+        if (!canvas) {
+            return;
+        }
 
-                Object.values(data.princess).forEach((princess) => {
-                    const { x, y } = princess.position;
-                    canvas.line(
-                        x,
-                        y,
-                        x + CROSS * Math.sin(princess.viewDirect),
-                        y + CROSS * Math.cos(princess.viewDirect),
-                        'rgba(0,0,0,1)',
-                        1
-                    );
+        canvas.clear();
 
-                    canvas.point(princess.position.x, princess.position.y, princess.size, princess.color);
-                });
+        if (data.dragon) {
+            drawDragon(data.dragon);
+        }
 
-                canvas.line(0.6, 2.3, 0.6, 2.3, 'red', 1);
+        if (data.booms) {
+            iterateObject(data.booms, (prop, { position, radius }) => (
+                canvas.point(position.x, position.y, radius, 'black') // бум!
+            ));
+        }
 
-                for (var key in data.shots) {
-                    if (data.shots[key]) {
-                        const st = data.shots[key];
-                        canvas.point(st.position.x, st.position.y, null, 'red'); // выстрел!
-                    }
-                }
-            }
+        if (data.princess) {
+            iterateObject(data.princess, (id, { position, viewDirect, size, color }) => {
+                const { x, y } = position;
+                canvas.line(
+                    x,
+                    y,
+                    x + CROSS * Math.sin(viewDirect),
+                    y + CROSS * Math.cos(viewDirect),
+                    'rgba(0,0,0,1)',
+                    1
+                );
+
+                canvas.point(x, y, size, color);
+            });
+
+            canvas.line(0.6, 2.3, 0.6, 2.3, 'red', 1);
+        }
+
+        if (data.shots) {
+            iterateObject(data.shots, (prop, { position }) => (
+                canvas.point(position.x, position.y, null, 'red') // выстрел!
+            ));
         }
     });
 
@@ -79,38 +86,42 @@ window.onload = () => {
     });
 };
 
-const handle = {
-    onLeftStick(data) {
-        socket.emit(
-            MOVE_PERSON,
-            {
-                moveDirect: getAngle(data['x-axis'], data['y-axis']),
-                viewDirect: getAngle(data.RIGHT_STICK_X_AXIS, data.RIGHT_STICK_Y_AXIS)
-            }
-        );
-    },
-    onRightStick() {
-        socket.emit(SHOT);
-    }
+const socketEmitThrottle = (action, payload, delay = 50) => throttle(socket.emit(action, payload), delay);
+
+const getSpeed = (x, y) => Math.sqrt(x ** 2 + y ** 2) / 10;
+
+const stopMoving = data => socket.emit(MOVE_PERSON, {
+    moveDirect: getAngle(data['x-axis'], data['y-axis']),
+    viewDirect: getAngle(data['x-axis'], data['y-axis']),
+    speed: 0
+});
+
+let interval = null;
+const onLeftStick = (data) => {
+    clearTimeout(interval);
+    interval = setTimeout(() => stopMoving(data), 400);
+
+    socketEmitThrottle(MOVE_PERSON, {
+        moveDirect: getAngle(data['x-axis'], data['y-axis']),
+        viewDirect: getAngle(data['x-axis'], data['y-axis']),
+        speed: getSpeed(data['x-axis'], data['y-axis'])
+    });
 };
 
+const onRightStick = () => socketEmitThrottle(SHOT);
+const onStartButton = () => console.log('start');
 
 window.CanvasGamepad.setup({
     canvas: 'controller',
-    start: { name: 'start', key: 'b' },
-    select: { name: 'select', key: 'v' },
     trace: true,
     leftStick: true,
     rightStick: true,
     debug: true,
     hint: true,
-    onStick: handle.onStick,
-    buttons: [
-        { name: 'a', key: 's' },
-        { name: 'b', key: 'a' },
-        { name: 'x', key: 'w' },
-        { name: 'y', key: 'q' }
-    ]
+    onLeftStick,
+    onRightStick,
+    onStartButton,
+    buttons: []
 });
 
 window.multikey.setup(window.CanvasGamepad.events, 'qwasbv', true);
