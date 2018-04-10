@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define */
+/* eslint-disable no-use-before-define, no-shadow */
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import { appendCss } from './utils/css';
@@ -507,17 +507,17 @@ function setup({
     start
 }) {
     document.addEventListener('touchmove', preventDefault);
-    appendCss();
+    appendCss(canvas);
 
     if (buttons) {
         buttonsLayout = prepareButtons(buttons, defaultButtonsLoyaout);
     }
 
-    if(rightStick) {
+    if (rightStick) {
         hasRightStick = rightStick;
     }
 
-    if(leftStick) {
+    if (leftStick) {
         hasLeftStick = leftStick;
     }
 
