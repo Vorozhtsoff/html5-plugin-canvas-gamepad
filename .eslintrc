@@ -3,7 +3,7 @@
     "rules": {
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "comma-dangle": ["error", "never"],
-        "no-mixed-operators": ["error", {}]
+        "no-mixed-operators": [0, {}]
     },
     "globals": { "window": true, "document": true }
 }
