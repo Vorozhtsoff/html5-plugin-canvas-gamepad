@@ -1,5 +1,5 @@
-import generateId from './utils/generate-id';
-import localStorage from './utils/local-storage';
+import generateId from '../utils/generate-id';
+import localStorage from '../utils/local-storage';
 
 const auth = () => {
     const id = localStorage.getItem('id');

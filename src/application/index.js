@@ -2,9 +2,10 @@ import io from 'socket.io-client';
 import throttle from 'lodash/throttle';
 import config from './config';
 import auth from './auth';
-import log from './utils/logger';
-import { getAngle } from './utils/math';
-import iterateObject from './utils/iterate-object';
+import log from '../utils/logger';
+import { getAngle } from '../utils/math';
+import iterateObject from '../utils/iterate-object';
+import Canvas from '../canvas';
 import { USER_LOGIN, MOVE_PERSON, SHOT, HIT, DEAD, START_GAME, FINISH_GAME, GET_AREA, GET_SCENE } from './message-types';
 
 const socket = io(config.host);
@@ -34,7 +35,7 @@ window.onload = () => {
     });
     socket.on(USER_LOGIN, data => log(data));
     socket.on(GET_AREA, (data) => {
-        canvas = new window.Canvas({
+        canvas = Canvas({
             area: {
                 left: data.CENTER.x - data.X_SIZE / 2,
                 bottom: data.CENTER.y - data.Y_SIZE / 2,

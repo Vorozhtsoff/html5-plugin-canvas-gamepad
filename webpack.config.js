@@ -8,7 +8,8 @@ module.exports = {
     mode: getEnv(),
     entry: {
         gamepad: ['./src/index.js'],
-        application: ['./src/application.js']
+        application: ['./src/application/index.js'],
+        canvas: ['./src/canvas/index.js']
     },
     output: {
         path: path.resolve(__dirname, BUILD_PATH),
@@ -18,6 +19,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             filename: 'index.html',
+            chunks: ['gamepad', 'application'],
             template: 'src/application/index.html'
         })
     ],
