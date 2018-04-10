@@ -5,7 +5,7 @@ import auth from './auth';
 import log from './utils/logger';
 import { getAngle } from './utils/math';
 import iterateObject from './utils/iterate-object';
-import { USER_LOGIN, MOVE_PERSON, SHOT, HIT, DEAD, CHANGE_NAME, START_GAME, FINISH_GAME, GET_AREA, GET_SCENE } from './message-types';
+import { USER_LOGIN, MOVE_PERSON, SHOT, HIT, DEAD, START_GAME, FINISH_GAME, GET_AREA, GET_SCENE } from './message-types';
 
 const socket = io(config.host);
 const APP_TYPE = 'phone';
@@ -69,19 +69,24 @@ window.onload = () => {
         }
 
         if (data.princess) {
-            iterateObject(data.princess, (id, { position, viewDirect, size, color }) => {
-                const { x, y } = position;
-                canvas.line(
-                    x,
-                    y,
-                    x + CROSS * Math.sin(viewDirect),
-                    y + CROSS * Math.cos(viewDirect),
-                    'rgba(0,0,0,1)',
-                    1
-                );
+            iterateObject(
+                data.princess,
+                (id, {
+                    position, viewDirect, size, color
+                }) => {
+                    const { x, y } = position;
+                    canvas.line(
+                        x,
+                        y,
+                        x + CROSS * Math.sin(viewDirect),
+                        y + CROSS * Math.cos(viewDirect),
+                        'rgba(0,0,0,1)',
+                        1
+                    );
 
-                canvas.point(x, y, size, color);
-            });
+                    canvas.point(x, y, size, color);
+                }
+            );
 
             canvas.line(0.6, 2.3, 0.6, 2.3, 'red', 1);
         }
@@ -125,11 +130,10 @@ const onLeftStick = (data) => {
 
 const onStartButton = () => console.log('start');
 const onStateChanges = (map) => {
-
     if (map.a) {
-        socketEmitThrottle(SHOT)
+        socketEmitThrottle(SHOT);
     }
-}
+};
 
 window.CanvasGamepad.setup({
     canvas: 'controller',
@@ -144,4 +148,3 @@ window.CanvasGamepad.setup({
 });
 
 window.multikey.setup(window.CanvasGamepad.events, 'qwasbv', true);
-
