@@ -118,21 +118,22 @@ const stopMoving = data => socket.emit(MOVE_PERSON, {
 });
 
 let interval = null;
-const onLeftStick = (data) => {
-    clearTimeout(interval);
-    interval = setTimeout(() => stopMoving(data), 400);
-
-    socketEmitThrottle(MOVE_PERSON, {
-        moveDirect: getAngle(data['x-axis'], data['y-axis']),
-        viewDirect: getAngle(data['x-axis'], data['y-axis']),
-        speed: getSpeed(data['x-axis'], data['y-axis'])
-    });
-};
-
-const onStartButton = () => console.log('start');
 const onStateChanges = (map) => {
     if (map.a) {
         socketEmitThrottle(SHOT);
+    }
+    const axisX = map['x-axis'];
+    const axisY = map['y-axis'];
+
+    if (axisX || axisY) {
+        clearTimeout(interval);
+        interval = setTimeout(() => stopMoving(map), 400);
+
+        socketEmitThrottle(MOVE_PERSON, {
+            moveDirect: getAngle(axisX, axisY),
+            viewDirect: getAngle(axisX, axisY),
+            speed: getSpeed(axisX, axisY)
+        });
     }
 };
 
@@ -142,8 +143,6 @@ window.CanvasGamepad.setup({
     leftStick: true,
     debug: true,
     hint: true,
-    onLeftStick,
-    onStartButton,
     onStateChanges,
     buttons: [{ name: 'a', key: 'a' }]
 });
