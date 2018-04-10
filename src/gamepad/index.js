@@ -1,4 +1,6 @@
 /* eslint-disable no-use-before-define */
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 import { appendCss } from './utils/css';
 import bit from './config/button-size';
 import colors from './config/colors';
@@ -29,14 +31,19 @@ const debug = true;
 const trace = true;
 const hidden = false;
 const radius = 25;
-const leftStick = true;
-const rightStick = true;
+let hasLeftStick = true;
+let hasRightStick = false;
 const layout = { x: 0, y: 0 };
 const layoutString = BOTTOM_RIGHT;
 const noop = () => null;
-let leftStickHandler = noop;
-let rightStickHandler = noop;
 
+const handlers = {
+    onLeftStick: noop,
+    onRightStick: noop,
+    onStartButton: noop,
+    onSelectButton: noop,
+    onStateChanges: noop
+};
 
 const state = {
     hasStartButton: true,
@@ -133,11 +140,12 @@ const controller = {
         }
 
         controller.buttons.init();
-        if (leftStick) {
+
+        if (hasLeftStick) {
             controller.stick.init();
         }
 
-        if (rightStick) {
+        if (hasRightStick) {
             controller.rightStick.init();
         }
     },
@@ -267,7 +275,7 @@ const controller = {
                 const dy = touch.y - button.dy;
                 let dist = width;
                 if (button.r) {
-                    dist = toDec(Math.sqrt((dx * dx) + (dy * dy)));
+                    dist = toDec(Math.sqrt((dx ** 2) + (dy ** 2)));
                 } else if (
                     touch.x > button.hit.x[0] &&
                     touch.x < button.hit.x[1] &&
@@ -374,7 +382,7 @@ const controller = {
                 map[this.X_DIR] = Math.round(map[this.X_AXIS]);
                 map[this.Y_DIR] = Math.round(map[this.Y_AXIS]);
 
-                rightStickHandler({ ...map });
+                handlers.onRightStick({ ...map });
 
                 if (dist > (this.radius * 1.5)) {
                     controller.stick.reset();
@@ -450,7 +458,7 @@ const controller = {
                 map['y-axis'] = (this.y - this.dy) / (this.radius / 2);
                 map['x-dir'] = toInt(map['x-axis']);
                 map['y-dir'] = toInt(map['y-axis']);
-                leftStickHandler({ ...map });
+                handlers.onLeftStick({ ...map });
 
                 if (dist > (this.radius * 1.5)) {
                     controller.stick.reset();
@@ -489,6 +497,10 @@ const preventDefault = e => e.preventDefault();
 function setup({
     canvas,
     buttons,
+    leftStick,
+    rightStick,
+    onStartButton,
+    onStateChanges,
     onRightStick,
     onLeftStick,
     select,
@@ -501,12 +513,28 @@ function setup({
         buttonsLayout = prepareButtons(buttons, defaultButtonsLoyaout);
     }
 
+    if(rightStick) {
+        hasRightStick = rightStick;
+    }
+
+    if(leftStick) {
+        hasLeftStick = leftStick;
+    }
+
+    if (onStartButton) {
+        handlers.onStartButton = onStartButton;
+    }
+
+    if (onStateChanges) {
+        handlers.onStateChanges = onStateChanges;
+    }
+
     if (onLeftStick) {
-        leftStickHandler = onLeftStick;
+        handlers.onLeftStick = onLeftStick;
     }
 
     if (onRightStick) {
-        rightStickHandler = onRightStick;
+        handlers.onRightStick = onRightStick;
     }
 
     stage.create(canvas);
@@ -522,6 +550,7 @@ function setup({
     events.bind();
     controller.init();
     init(stage.ctx);
+    setDefaultMap(map);
 }
 
 function draw(ctx) {
@@ -543,11 +572,11 @@ function draw(ctx) {
 
             });
         }
-        if (leftStick) {
+        if (hasLeftStick) {
             controller.stick.draw(ctx);
         }
 
-        if (rightStick) {
+        if (hasRightStick) {
             controller.rightStick.draw(ctx);
         }
 
@@ -646,7 +675,6 @@ const events = {
             const keys = e;
             let dir = 0;
             Object.entries(keys).forEach(([prop]) => {
-                console.log('prop', keys, dir);
                 switch (prop) {
                     case '%':// left
                         if (keys[prop]) { dir += 1; }
@@ -689,7 +717,6 @@ const events = {
                 }
                 controller.stick.dx = controller.stick.x;
                 controller.stick.dy = controller.stick.y;
-                console.log(dir);
                 switch (dir) {
                     case 1:// left
                         controller.stick.dx = controller.stick.x - (controller.stick.radius / 2);
@@ -744,11 +771,25 @@ const events = {
     }
 };
 
+let defaultMap = null;
+const setDefaultMap = (map) => {
+    defaultMap = cloneDeep(map);
+};
+
+const emitChanges = (map, cb) => {
+    const newMap = cloneDeep(map);
+    const isDiff = !isEqual(newMap, defaultMap);
+    if (isDiff) {
+        cb({ ...newMap });
+    }
+};
+
 (function loop() {
     toggle = !toggle;
 
     if (!toggle && ready) {
         draw(stage.ctx);
+        emitChanges(map, handlers.onStateChanges);
     }
 
     window.requestAnimationFrame(loop);
