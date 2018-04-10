@@ -15,8 +15,23 @@ const drawDragon = ({ position, size }) => (
     canvas.point(position.x, position.y, size, 'blue')
 );
 
+const drawBoom = ({ x, y, radius }) => (
+    radius > 0 && canvas.point(x, y, radius, 'black')
+);
+
+const PRINCESS_COLORS = ['#9C02A7FF', '#FF5301FF', '#1634ADFF', '#FEBB02FF', '#019898FF', '#01CB01FF', '#DEF801FF'];
+
+const getRandomColor = (map) => {
+    const id = parseInt(Math.random() * map.length, 10);
+    return map[id];
+};
+
 window.onload = () => {
-    socket.emit(USER_LOGIN, { type: APP_TYPE, id: auth() });
+    socket.emit(USER_LOGIN, {
+        type: APP_TYPE,
+        id: auth(),
+        color: getRandomColor(PRINCESS_COLORS)
+    });
     socket.on(USER_LOGIN, data => log(data));
     socket.on(GET_AREA, (data) => {
         canvas = new window.Canvas({
@@ -49,7 +64,7 @@ window.onload = () => {
 
         if (data.booms) {
             iterateObject(data.booms, (prop, { position, radius }) => (
-                canvas.point(position.x, position.y, radius, 'black') // бум!
+                drawBoom({ x: position.x, y: position.y, radius })
             ));
         }
 
@@ -73,7 +88,7 @@ window.onload = () => {
 
         if (data.shots) {
             iterateObject(data.shots, (prop, { position }) => (
-                canvas.point(position.x, position.y, null, 'red') // выстрел!
+                canvas.point(position.x, position.y, null, 'red')
             ));
         }
     });
@@ -86,7 +101,7 @@ window.onload = () => {
     });
 };
 
-const socketEmitThrottle = (action, payload, delay = 50) => throttle(socket.emit(action, payload), delay);
+const socketEmitThrottle = throttle((action, payload) => socket.emit(action, payload), 50);
 
 const getSpeed = (x, y) => Math.sqrt(x ** 2 + y ** 2) / 10;
 
@@ -108,20 +123,24 @@ const onLeftStick = (data) => {
     });
 };
 
-const onRightStick = () => socketEmitThrottle(SHOT);
 const onStartButton = () => console.log('start');
+const onStateChanges = (map) => {
+
+    if (map.a) {
+        socketEmitThrottle(SHOT)
+    }
+}
 
 window.CanvasGamepad.setup({
     canvas: 'controller',
     trace: true,
     leftStick: true,
-    rightStick: true,
     debug: true,
     hint: true,
     onLeftStick,
-    onRightStick,
     onStartButton,
-    buttons: []
+    onStateChanges,
+    buttons: [{ name: 'a', key: 'a' }]
 });
 
 window.multikey.setup(window.CanvasGamepad.events, 'qwasbv', true);
