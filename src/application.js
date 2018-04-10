@@ -144,3 +144,4 @@ window.CanvasGamepad.setup({
 });
 
 window.multikey.setup(window.CanvasGamepad.events, 'qwasbv', true);
+
